@@ -3,12 +3,18 @@ import Input from "./Input";
 
 export default function Hero() {
   return (
-    <section className="relative w-full min-h-[calc(110vh-4rem)] flex items-center justify-center overflow-hidden pt-16 sm:pt-20">
+    <section className="relative w-full min-h-[90vh] md:h-screen flex items-center justify-center overflow-hidden">
       {/* Background image */}
       <img
-        src="https://images.unsplash.com/photo-1552709607-b93cb1c5edec?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1151"
+        src="https://images.unsplash.com/photo-1624864004706-3a154fd7a3ae?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170"
         alt="Taxi background"
-        className="absolute inset-0 w-full h-full object-cover"
+        className="absolute inset-0 
+        w-full h-full 
+        object-cover 
+        md:object-center 
+        object-[center_40%]   /* keeps focus visible on mobile */
+        sm:h-[90vh] md:h-screen 
+        transition-all duration-500 ease-in-out"
       />
 
       {/* Overlay */}

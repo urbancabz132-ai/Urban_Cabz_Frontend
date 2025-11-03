@@ -92,7 +92,7 @@ export default function Input() {
                   ? "Select pickup airport"
                   : "Enter pickup city"
               }
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-400 outline-none"
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-400 text-white outline-none"
             />
             {showFromSuggestions && fromQuery && (
               <ul className="absolute left-0 right-0 bg-white text-gray-800 rounded-lg shadow-lg mt-1 z-50 max-h-48 overflow-y-auto">
@@ -157,14 +157,22 @@ export default function Input() {
             )}
           </div>
 
-          {/* Pickup Date */}
+         {/* Pickup Date */}
           <div>
             <label className="block text-sm font-semibold text-white mb-1">
               Pickup Date
             </label>
             <input
               type="date"
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-400 outline-none"
+              className="
+                w-full px-4 py-3 rounded-lg border border-gray-300 
+                focus:ring-2 focus:ring-yellow-400 outline-none 
+                appearance-none 
+                text-gray-800
+                [&::-webkit-date-and-time-value]:text-gray-800
+                [&::-webkit-datetime-edit]:text-gray-800
+                [&::-webkit-calendar-picker-indicator]:opacity-70
+              "
             />
           </div>
 
@@ -175,7 +183,15 @@ export default function Input() {
             </label>
             <input
               type="time"
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-400 outline-none"
+              className="
+                w-full px-4 py-3 rounded-lg border border-gray-300 
+                focus:ring-2 focus:ring-yellow-400 outline-none 
+                appearance-none
+                text-gray-800
+                [&::-webkit-date-and-time-value]:text-gray-800
+                [&::-webkit-datetime-edit]:text-gray-800
+                [&::-webkit-calendar-picker-indicator]:opacity-70
+              "
             />
           </div>
 
