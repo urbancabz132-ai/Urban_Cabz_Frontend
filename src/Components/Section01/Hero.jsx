@@ -3,7 +3,7 @@ import Input from "./Input";
 
 export default function Hero() {
   return (
-    <section className="relative w-full min-h-[90vh] md:h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative w-full min-h-[90vh] md:h-screen flex items-center justify-center overflow-hidden pt-20">
       {/* Background image */}
       <img
         src="https://images.unsplash.com/photo-1624864004706-3a154fd7a3ae?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170"

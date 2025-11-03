@@ -42,7 +42,7 @@ export default function Input() {
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="bg-white/15 backdrop-blur-md border border-white/30 rounded-3xl p-8 md:p-10 shadow-2xl text-gray-900 mx-auto max-w-5xl"
+      className="bg-white/15 backdrop-blur-md border border-white/30 rounded-3xl p-8 md:p-10 shadow-2xl mx-auto max-w-5xl"
     >
       {/* Ride Type Buttons */}
       <div className="flex justify-center gap-6 mb-8 flex-wrap">
@@ -166,12 +166,16 @@ export default function Input() {
               type="date"
               className="
                 w-full px-4 py-3 rounded-lg border border-gray-300 
+                bg-transparent text-white
                 focus:ring-2 focus:ring-yellow-400 outline-none 
                 appearance-none 
-                text-gray-800
-                [&::-webkit-date-and-time-value]:text-gray-800
-                [&::-webkit-datetime-edit]:text-gray-800
                 [&::-webkit-calendar-picker-indicator]:opacity-70
+                [&::-webkit-datetime-edit]:text-white
+                [&::-webkit-datetime-edit-fields-wrapper]:text-white
+                [&::-webkit-datetime-edit-text]:text-white
+                [&::-webkit-datetime-edit-month-field]:text-white
+                [&::-webkit-datetime-edit-day-field]:text-white
+                [&::-webkit-datetime-edit-year-field]:text-white
               "
             />
           </div>
@@ -185,13 +189,14 @@ export default function Input() {
               type="time"
               className="
                 w-full px-4 py-3 rounded-lg border border-gray-300 
+                bg-transparent text-white
                 focus:ring-2 focus:ring-yellow-400 outline-none 
                 appearance-none
-                text-gray-800
-                [&::-webkit-date-and-time-value]:text-gray-800
-                [&::-webkit-datetime-edit]:text-gray-800
                 [&::-webkit-calendar-picker-indicator]:opacity-70
-              "
+              [&::-webkit-datetime-edit]:text-white
+              [&::-webkit-datetime-edit-fields-wrapper]:text-white
+              [&::-webkit-datetime-edit-text]:text-white
+             "
             />
           </div>
 
@@ -204,7 +209,15 @@ export default function Input() {
                 </label>
                 <input
                   type="date"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-400 outline-none"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 
+                    bg-transparent text-white
+                    focus:ring-2 focus:ring-yellow-400 outline-none 
+                    appearance-none
+                    [&::-webkit-calendar-picker-indicator]:opacity-70
+                  [&::-webkit-datetime-edit]:text-white
+                  [&::-webkit-datetime-edit-fields-wrapper]:text-white
+                  [&::-webkit-datetime-edit-text]:text-white
+                "
                 />
               </div>
               <div>
@@ -213,7 +226,15 @@ export default function Input() {
                 </label>
                 <input
                   type="time"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-400 outline-none"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 
+                  bg-transparent text-white
+                  focus:ring-2 focus:ring-yellow-400 outline-none 
+                  appearance-none
+                  [&::-webkit-calendar-picker-indicator]:opacity-70
+                [&::-webkit-datetime-edit]:text-white
+                [&::-webkit-datetime-edit-fields-wrapper]:text-white
+                [&::-webkit-datetime-edit-text]:text-white
+                "
                 />
               </div>
             </>
