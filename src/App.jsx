@@ -1,7 +1,7 @@
 
-import Section01 from './Components/Section01/Section01'
-import Section02 from './Components/Section02/Section02'
-import Footer from "./Components/Footer";
+import Section01 from './Components_Temp/Section01/Section01'
+import Section02 from './Components_Temp/Section02/Section02'
+import Footer from "./Components_Temp/Footer";
 
 
 function App() {
