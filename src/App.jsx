@@ -2,6 +2,7 @@ import Footer from './Components/Footer/Footer';
 import Navbar from './Components/Navigation/Navbar';
 import B2BLandingPage from './Pages/B2BLandingPage';
 import LandingPage from './Pages/LandingPage';
+import CabBooking from './Pages/CabBooking';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/b2b" element={<B2BLandingPage />} />
+          <Route path="/cab-booking" element={<CabBooking />} />
         </Routes>
       <Footer />
     </Router>
