@@ -28,54 +28,130 @@ export default function BookingDetailsMain({
   return (
     <div className="space-y-6">
       {/* Top card: vehicle + trip summary */}
-      <div className="bg-white rounded-2xl shadow-md p-6 flex gap-6">
-        <div className="w-36 flex-shrink-0">
-          <div className="rounded-xl overflow-hidden bg-gray-100 p-4">
-            <img src={image} alt={name} className="w-full h-28 object-contain" />
+      <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/60 border border-slate-100 p-5 sm:p-6 lg:p-7 flex flex-col md:flex-row gap-5 md:gap-7">
+        {/* Vehicle block */}
+        <div className="w-full md:w-40 lg:w-44 flex-shrink-0">
+          <div className="relative rounded-2xl overflow-hidden bg-slate-50 border border-slate-100 p-4 flex items-center justify-center">
+            <img
+              src={image}
+              alt={name}
+              className="w-full h-28 object-contain"
+            />
+            <div className="absolute left-3 top-3 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-medium text-slate-100">
+              {rideType === "roundtrip" ? "Round trip" : "One way"}
+            </div>
           </div>
-          <div className="text-center mt-3 text-sm font-semibold bg-gray-100 rounded-full py-2">{vehicleType}</div>
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+              <span className="inline-block h-2 w-2 rounded-full bg-emerald-400" />
+              {vehicleType}
+            </div>
+            <button
+              type="button"
+              onClick={onBack}
+              className="text-xs text-slate-500 hover:text-slate-700 underline decoration-dotted"
+            >
+              Change cab
+            </button>
+          </div>
         </div>
 
-        <div className="flex-1">
-          <div className="flex items-start justify-between">
+        {/* Trip + fare */}
+        <div className="flex-1 flex flex-col gap-4">
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-extrabold text-gray-800">
-                {name} <span className="text-yellow-500">★</span>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+                {name}
               </h2>
+              <p className="mt-1 text-xs text-slate-500">
+                AC • Verified driver • Comfortable for family travel
+              </p>
 
-              <div className="mt-3 bg-indigo-50 rounded-lg p-4 text-sm text-gray-700">
-                <div className="flex justify-between">
-                  <div>
-                    <div className="font-semibold">Pickup</div>
-                    <div className="text-sm mt-1">{from}</div>
-                    <div className="text-xs text-gray-500 mt-2">{pickupDate} • {pickupTime}</div>
+              {/* Route summary */}
+              <div className="mt-4 rounded-2xl bg-slate-50 border border-slate-100 px-4 py-3 text-sm text-slate-800">
+                <div className="flex gap-4">
+                  <div className="flex flex-col items-center pt-0.5">
+                    <div className="h-2 w-2 rounded-full bg-emerald-400" />
+                    <div className="flex-1 w-px bg-slate-300 my-1" />
+                    <div className="h-2 w-2 rounded-full bg-red-400" />
                   </div>
-
-                  <div className="border-l pl-6">
-                    <div className="font-semibold">Drop-Off</div>
-                    <div className="text-sm mt-1">{to}</div>
+                  <div className="flex-1 space-y-3">
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wide text-slate-500">
+                        Pickup
+                      </p>
+                      <p className="mt-0.5 text-sm font-medium text-slate-900">
+                        {from}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {pickupDate} • {pickupTime}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wide text-slate-500">
+                        Drop-off
+                      </p>
+                      <p className="mt-0.5 text-sm font-medium text-slate-900">
+                        {to}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="mt-4 flex gap-2 flex-wrap">
-                  {tags && tags.length ? tags.map((t, i) => (
-                    <span key={i} className="text-xs bg-white/70 px-3 py-1 rounded-full border">{t}</span>
-                  )) : (
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-slate-600">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 border border-slate-100">
+                    Instant cab confirmation
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 border border-slate-100">
+                    Luggage included
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 border border-slate-100">
+                    Live tracking link
+                  </span>
+                </div>
+              </div>
+
+              {/* Tags */}
+              <div className="mt-3 flex flex-wrap gap-2">
+                {tags && tags.length
+                  ? tags.map((t, i) => (
+                      <span
+                        key={i}
+                        className="text-[11px] bg-slate-100 px-3 py-1 rounded-full border border-slate-200 text-slate-700"
+                      >
+                        {t}
+                      </span>
+                    ))
+                  : (
                     <>
-                      <span className="text-xs bg-white/70 px-3 py-1 rounded-full border">Tissues</span>
-                      <span className="text-xs bg-white/70 px-3 py-1 rounded-full border">Sanitiser</span>
-                      <span className="text-xs bg-white/70 px-3 py-1 rounded-full border">Car Freshner</span>
+                      <span className="text-[11px] bg-slate-100 px-3 py-1 rounded-full border border-slate-200 text-slate-700">
+                        Tissues
+                      </span>
+                      <span className="text-[11px] bg-slate-100 px-3 py-1 rounded-full border border-slate-200 text-slate-700">
+                        Sanitiser
+                      </span>
+                      <span className="text-[11px] bg-slate-100 px-3 py-1 rounded-full border border-slate-200 text-slate-700">
+                        Car freshener
+                      </span>
                     </>
                   )}
-                </div>
               </div>
             </div>
 
-            <div className="text-right">
-              <div className="text-3xl font-extrabold">{price > 0 ? `₹${price.toLocaleString()}` : '—'}</div>
-              <div className="text-sm text-gray-500">{distanceKm ? `${distanceKm} km` : 'Calculating...'}</div>
+            <div className="text-right self-start">
+              <div className="text-xs uppercase tracking-[0.2em] text-slate-500">
+                Estimated fare
+              </div>
+              <div className="mt-1 text-3xl font-extrabold text-slate-900">
+                {price > 0 ? `₹${price.toLocaleString()}` : "—"}
+              </div>
+              <div className="mt-1 text-xs text-slate-500">
+                {distanceKm ? `${distanceKm} km` : "Calculating distance..."}
+              </div>
               {rideType === "roundtrip" && (
-                <div className="text-xs text-gray-500 mt-1">Includes return journey</div>
+                <div className="mt-1 inline-flex items-center rounded-full bg-yellow-50 px-3 py-1 text-[11px] font-medium text-yellow-700 border border-yellow-200">
+                  Includes return journey
+                </div>
               )}
             </div>
           </div>
@@ -83,92 +159,149 @@ export default function BookingDetailsMain({
       </div>
 
       {/* Inclusions / Exclusions */}
-      <div className="bg-white rounded-2xl shadow-md p-6">
+      <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/60 border border-slate-100 p-5 sm:p-6 lg:p-7">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <h3 className="font-bold text-xl mb-3">Inclusions <span className="text-sm text-gray-500">(included in the price)</span></h3>
-            <ul className="list-disc pl-5 text-gray-700">
-              <li>{distanceKm ? `${distanceKm} km` : 'Calculating...'}</li>
+            <h3 className="font-semibold text-lg text-slate-900 mb-1">
+              Inclusions
+            </h3>
+            <p className="text-xs text-slate-500 mb-3">
+              Already covered in your fare.
+            </p>
+            <ul className="space-y-2 text-sm text-slate-700">
+              <li>
+                Distance up to{" "}
+                <span className="font-medium">
+                  {distanceKm ? `${distanceKm} km` : "Calculating..."}
+                </span>
+              </li>
+              <li>Driver & vehicle charges</li>
+              <li>Standard waiting at pickup (up to 15 mins)</li>
             </ul>
           </div>
 
           <div>
-            <h3 className="font-bold text-xl mb-3">Exclusions <span className="text-sm text-gray-500">(Not included in the price)</span></h3>
-            <ul className="list-disc pl-5 text-gray-700">
-              <li>Night Charges</li>
-              <li>Toll Charges</li>
-              <li>State Tax</li>
-              <li>Parking Charges</li>
-              <li>Waiting Charges (After 45 mins: ₹100 / 30 mins)</li>
-              <li>Fare Beyond 260 Kms (₹19 / Km)</li>
+            <h3 className="font-semibold text-lg text-slate-900 mb-1">
+              Exclusions
+            </h3>
+            <p className="text-xs text-slate-500 mb-3">
+              Pay directly to the driver if applicable.
+            </p>
+            <ul className="space-y-2 text-sm text-slate-700">
+              <li>Night charges</li>
+              <li>Toll charges</li>
+              <li>State tax</li>
+              <li>Parking charges</li>
+              <li>Waiting charges after 45 mins (₹100 / 30 mins)</li>
+              <li>Fare beyond 260 kms (₹19 / km)</li>
             </ul>
           </div>
         </div>
       </div>
 
       {/* Trip Details Form */}
-      <div className="bg-white rounded-2xl shadow-md p-6">
-        <h3 className="font-bold text-xl mb-4">Trip Details</h3>
+      <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/60 border border-slate-100 p-5 sm:p-6 lg:p-7">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+          <div>
+            <h3 className="font-semibold text-lg text-slate-900">
+              Passenger & trip details
+            </h3>
+            <p className="text-xs text-slate-500">
+              Share who is travelling so our driver can reach you easily.
+            </p>
+          </div>
+          <p className="text-[11px] text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-full px-3 py-1 self-start">
+            Your details are safe & used only for this trip.
+          </p>
+        </div>
 
         <form className="space-y-4">
-          <div>
-            <label className="block text-sm text-gray-700 mb-2">Pick-up Address</label>
-            <input
-              value={from || ""}
-              readOnly
-              className="w-full rounded-xl border px-4 py-3 bg-gray-50 text-gray-700 cursor-not-allowed"
-            />
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1">
+                Pick-up address
+              </label>
+              <input
+                value={from || ""}
+                readOnly
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 bg-slate-50 text-slate-700 text-sm cursor-not-allowed"
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm text-gray-700 mb-2">Drop-off Address</label>
-            <input
-              value={to || ""}
-              readOnly
-              className="w-full rounded-xl border px-4 py-3 bg-gray-50 text-gray-700 cursor-not-allowed"
-            />
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1">
+                Drop-off address
+              </label>
+              <input
+                value={to || ""}
+                readOnly
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 bg-slate-50 text-slate-700 text-sm cursor-not-allowed"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-gray-700 mb-2">Name</label>
+              <label className="block text-xs font-medium text-slate-600 mb-1">
+                Name
+              </label>
               <input
                 placeholder="Your name"
                 defaultValue={user?.name || ""}
-                className="w-full rounded-xl border px-4 py-3"
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-gray-700 mb-2">Contact No</label>
+              <label className="block text-xs font-medium text-slate-600 mb-1">
+                Contact number
+              </label>
               <input
                 placeholder="+91 9XXXXXXXXX"
                 defaultValue={user?.phone || ""}
-                className="w-full rounded-xl border px-4 py-3"
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-gray-700 mb-2">Email Id</label>
+              <label className="block text-xs font-medium text-slate-600 mb-1">
+                Email ID
+              </label>
               <input
                 placeholder="you@example.com"
                 defaultValue={user?.email || ""}
-                className="w-full rounded-xl border px-4 py-3"
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-gray-700 mb-2">Remark (Optional)</label>
-              <input placeholder="remarks" className="w-full rounded-xl border px-4 py-3" />
+              <label className="block text-xs font-medium text-slate-600 mb-1">
+                Remark (optional)
+              </label>
+              <input
+                placeholder="Eg. travelling with kids, extra luggage…"
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
+              />
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
-            <div className="flex items-center gap-3">
-              <input type="checkbox" id="agree" defaultChecked />
-              <label htmlFor="agree" className="text-sm text-gray-700">By proceeding to book, I Agree to Terms</label>
+          <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between pt-1">
+            <div className="flex items-start gap-2">
+              <input
+                type="checkbox"
+                id="agree"
+                defaultChecked
+                className="mt-0.5"
+              />
+              <label htmlFor="agree" className="text-xs text-slate-600 leading-relaxed">
+                By proceeding to book, I agree to the{" "}
+                <span className="underline cursor-pointer">
+                  terms & conditions
+                </span>{" "}
+                and cancellation policy.
+              </label>
             </div>
           </div>
         </form>

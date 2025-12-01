@@ -1,16 +1,18 @@
 @import "tailwindcss";
 
+/* Global smooth scrolling for a more premium feel */
+html {
+  scroll-behavior: smooth;
+  scrollbar-width: none; /* Firefox: hide scrollbar but keep scroll */
+  scroll-padding-top: 88px; /* account for fixed navbar */
+}
+
 /* Hide scrollbar but keep page scrollable */
 
 /* For Chrome, Safari, and Edge */
 ::-webkit-scrollbar {
   width: 0px;
   height: 0px;
-}
-
-/* For Firefox */
-html {
-  scrollbar-width: none;
 }
 
 /* For IE, Edge (legacy) */

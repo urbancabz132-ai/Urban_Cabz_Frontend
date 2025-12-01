@@ -35,31 +35,59 @@ export default function CabBookingDetails() {
   const price = calculatePrice();
 
   const goBack = () => navigate(-1);
-  const onPayNow = () => {
+  const onPayNow = (amount) => {
     // Replace with payment flow
-    alert(`Proceed to payment for ₹${price}`);
+    alert(`Proceed to payment for ₹${amount}`);
   };
 
   return (
-    <div className="pt-24 pb-12 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <BookingDetailsMain
-            listing={listing}
-            from={from}
-            to={to}
-            pickupDate={pickupDate}
-            pickupTime={pickupTime}
-            distanceKm={distanceKm}
-            rideType={rideType}
-            price={price}
-            onBack={goBack}
-          />
+    <div className="pt-24 pb-12 bg-slate-50 min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        {/* Page header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold tracking-[0.2em] uppercase text-yellow-600">
+              Review & confirm
+            </p>
+            <h1 className="mt-1 text-2xl md:text-3xl font-extrabold text-slate-900">
+              Cab booking summary
+            </h1>
+            <p className="mt-1 text-sm text-slate-500">
+              Check your trip details and choose how you want to pay.
+            </p>
+          </div>
+
+          <button
+            onClick={goBack}
+            className="inline-flex items-center gap-2 self-start rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:border-slate-300"
+          >
+            <span className="text-base">←</span>
+            Back to cab options
+          </button>
         </div>
 
-        <aside>
-          <BookingDetailsSidebar price={price} onPayNow={onPayNow} />
-        </aside>
+        {/* Main layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          {/* Left: booking details (scrolls with page) */}
+          <div className="lg:col-span-2 space-y-6">
+            <BookingDetailsMain
+              listing={listing}
+              from={from}
+              to={to}
+              pickupDate={pickupDate}
+              pickupTime={pickupTime}
+              distanceKm={distanceKm}
+              rideType={rideType}
+              price={price}
+              onBack={goBack}
+            />
+          </div>
+
+          {/* Right: payment summary (floats on large screens) */}
+          <aside>
+            <BookingDetailsSidebar price={price} onPayNow={onPayNow} />
+          </aside>
+        </div>
       </div>
     </div>
   );
