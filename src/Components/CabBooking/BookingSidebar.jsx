@@ -14,13 +14,19 @@ const INITIAL_METRICS = {
   isEstimate: false,
 };
 
+const isPlaceholderLocation = (value) => {
+  if (!value) return true;
+  const normalized = value.trim().toLowerCase();
+  return normalized === "pickup location" || normalized === "drop location";
+};
+
 export default function BookingSidebar({ from, to, pickupDate, pickupTime, onDistanceCalculated }) {
   const [tripMetrics, setTripMetrics] = useState(INITIAL_METRICS);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!from || !to) {
+    if (!from || !to || isPlaceholderLocation(from) || isPlaceholderLocation(to)) {
       setTripMetrics(INITIAL_METRICS);
       setError(null);
       return;

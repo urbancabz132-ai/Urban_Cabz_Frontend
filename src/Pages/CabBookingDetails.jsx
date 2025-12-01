@@ -2,6 +2,8 @@ import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import BookingDetailsMain from "../Components/BookingDetails/BookingDetailsMain";
 import BookingDetailsSidebar from "../Components/BookingDetails/BookingDetailsSidebar";
+import { useAuth } from "../context/AuthContext";
+import { initiateRazorpayPayment } from "../services/paymentService";
 
 /**
  * CabBookingDetails page
@@ -12,6 +14,7 @@ import BookingDetailsSidebar from "../Components/BookingDetails/BookingDetailsSi
 export default function CabBookingDetails() {
   const { state } = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const listing = state?.listing || {};
   const from = state?.from || "Pickup location";
@@ -35,9 +38,42 @@ export default function CabBookingDetails() {
   const price = calculatePrice();
 
   const goBack = () => navigate(-1);
-  const onPayNow = (amount) => {
-    // Replace with payment flow
-    alert(`Proceed to payment for ₹${amount}`);
+
+  const onPayNow = async (amount) => {
+    const bookingDetails = {
+      amount,
+      totalFare: price,
+      payNowAmount: amount,
+      vehicleId: listing.id,
+      vehicleName: listing.name,
+      vehicleType: listing.vehicleType,
+      from,
+      to,
+      pickupDate,
+      pickupTime,
+      distanceKm,
+      rideType,
+    };
+
+    const prefill = {
+      name: user?.fullName || user?.name || "",
+      email: user?.email || "",
+      contact: user?.mobile || user?.phone || "",
+    };
+
+    const result = await initiateRazorpayPayment({
+      amount,
+      currency: "INR",
+      bookingDetails,
+      prefill,
+    });
+
+    if (result.success) {
+      alert("Payment  successfuland booking confirmed!");
+      navigate("/");
+    } else if (!result.cancelled) {
+      alert(result.message || "Payment failed. Please try again.");
+    }
   };
 
   return (
