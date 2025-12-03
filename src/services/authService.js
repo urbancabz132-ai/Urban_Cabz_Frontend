@@ -406,3 +406,79 @@ export async function updateCustomerProfile(payload) {
     };
   }
 }
+
+/**
+ * Request password reset OTP over WhatsApp
+ */
+export async function requestPasswordReset(payload) {
+  const body = {};
+  if (payload.email) body.email = payload.email;
+  if (payload.phone) body.phone = payload.phone;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/password/forgot`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      return {
+        success: false,
+        message: data.message || 'Unable to send OTP',
+      };
+    }
+
+    return {
+      success: true,
+      data,
+      message: data.message || 'OTP sent successfully',
+    };
+  } catch (error) {
+    console.error('❌ Password reset OTP error:', error);
+    return {
+      success: false,
+      message: 'Network error. Please try again.',
+      error: error.message,
+    };
+  }
+}
+
+/**
+ * Complete password reset with OTP
+ */
+export async function completePasswordReset(payload) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/password/reset`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        resetId: payload.resetId,
+        otp: payload.otp,
+        newPassword: payload.newPassword,
+      }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      return {
+        success: false,
+        message: data.message || 'Unable to reset password',
+      };
+    }
+
+    return {
+      success: true,
+      data,
+      message: data.message || 'Password updated successfully',
+    };
+  } catch (error) {
+    console.error('❌ Password reset completion error:', error);
+    return {
+      success: false,
+      message: 'Network error. Please try again.',
+      error: error.message,
+    };
+  }
+}

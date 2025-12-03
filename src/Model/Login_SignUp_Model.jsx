@@ -5,8 +5,19 @@ import {
   customerSignup,
   businessLogin,
   businessSignup,
+  requestPasswordReset,
+  completePasswordReset,
 } from "../services/authService";
 import { useAuth } from "../context/AuthContext";
+
+const initialForgotState = {
+  identifier: "",
+  otp: "",
+  newPassword: "",
+  confirmPassword: "",
+  resetId: null,
+  step: "request",
+};
 
 export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -31,6 +42,10 @@ export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotForm, setForgotForm] = useState(initialForgotState);
+  const [forgotLoading, setForgotLoading] = useState(false);
 
   // Handle input changes
   const handleChange = (e) => {
@@ -207,9 +222,121 @@ export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
     }
   };
 
+  const handleForgotChange = (e) => {
+    setForgotForm({
+      ...forgotForm,
+      [e.target.name]: e.target.value,
+    });
+    setError("");
+    setSuccess("");
+  };
+
+  const handleForgotPasswordSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    if (forgotForm.step === "request") {
+      if (!forgotForm.identifier) {
+        setError("Please enter your registered email or phone number");
+        return;
+      }
+
+      setForgotLoading(true);
+      const payload = forgotForm.identifier.includes("@")
+        ? { email: forgotForm.identifier.trim() }
+        : { phone: forgotForm.identifier.trim() };
+      const result = await requestPasswordReset(payload);
+      setForgotLoading(false);
+
+      if (result.success) {
+        setSuccess(
+          `OTP sent to WhatsApp (${result.data?.destination || "registered number"})`
+        );
+        setForgotForm((prev) => ({
+          ...prev,
+          resetId: result.data?.resetId,
+          step: "verify",
+        }));
+      } else {
+        setError(result.message || "Unable to send OTP. Try again.");
+      }
+    } else {
+      if (!forgotForm.resetId) {
+        setError("Please request a new OTP.");
+        return;
+      }
+
+      if (!forgotForm.otp || !forgotForm.newPassword) {
+        setError("Enter OTP and new password");
+        return;
+      }
+
+      if (forgotForm.newPassword.length < 6) {
+        setError("Password must be at least 6 characters");
+        return;
+      }
+
+      if (forgotForm.newPassword !== forgotForm.confirmPassword) {
+        setError("Passwords do not match");
+        return;
+      }
+
+      setForgotLoading(true);
+      const result = await completePasswordReset({
+        resetId: forgotForm.resetId,
+        otp: forgotForm.otp.trim(),
+        newPassword: forgotForm.newPassword,
+      });
+      setForgotLoading(false);
+
+      if (result.success) {
+        setSuccess("Password reset successful. Please login with your new password.");
+        setShowForgotPassword(false);
+        setForgotForm(initialForgotState);
+      } else {
+        setError(result.message || "Unable to reset password");
+      }
+    }
+  };
+
+  const handleForgotToggle = () => {
+    setShowForgotPassword((prev) => !prev);
+    setForgotForm(initialForgotState);
+    setError("");
+    setSuccess("");
+  };
+
+  const handleResendOtp = async () => {
+    if (!forgotForm.identifier) {
+      setError("Enter your email or phone to resend OTP");
+      return;
+    }
+    setError("");
+    setSuccess("");
+    setForgotLoading(true);
+    const payload = forgotForm.identifier.includes("@")
+      ? { email: forgotForm.identifier.trim() }
+      : { phone: forgotForm.identifier.trim() };
+    const result = await requestPasswordReset(payload);
+    setForgotLoading(false);
+
+    if (result.success) {
+      setSuccess("New OTP sent to your WhatsApp number.");
+      setForgotForm((prev) => ({
+        ...prev,
+        resetId: result.data?.resetId,
+        step: "verify",
+      }));
+    } else {
+      setError(result.message || "Unable to resend OTP. Try again.");
+    }
+  };
+
   // Switch between login/signup
   const handleTabSwitch = (loginMode) => {
     setIsLogin(loginMode);
+    setShowForgotPassword(false);
     setError("");
     setSuccess("");
     setFormData({
@@ -222,6 +349,7 @@ export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
       companyEmail: "",
       gstNumber: "",
     });
+    setForgotForm(initialForgotState);
   };
 
   return (
@@ -289,77 +417,182 @@ export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
         >
           <AnimatePresence mode="wait">
             {isLogin ? (
-              /* LOGIN */
-              <motion.form
-                key="login"
-                layout
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.32, ease: "easeInOut" }}
-                onSubmit={isBusiness ? handleBusinessLogin : handleCustomerLogin}
-              >
-                <h2 className="text-2xl font-semibold text-center mb-5">
-                  {isBusiness ? "Business Login" : "Welcome Back"}
-                </h2>
+              showForgotPassword ? (
+                <motion.form
+                  key="forgot-password"
+                  layout
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -12 }}
+                  transition={{ duration: 0.32, ease: "easeInOut" }}
+                  onSubmit={handleForgotPasswordSubmit}
+                >
+                  <h2 className="text-2xl font-semibold text-center mb-5">Reset Password</h2>
 
-                {isBusiness && (
+                  {forgotForm.step === "request" ? (
+                    <div className="mb-4">
+                      <label className="block text-sm text-white/85 mb-1">
+                        Registered Email or Phone
+                      </label>
+                      <input
+                        type="text"
+                        name="identifier"
+                        value={forgotForm.identifier}
+                        onChange={handleForgotChange}
+                        placeholder="you@example.com / +91XXXXXXXXXX"
+                        disabled={forgotLoading}
+                        className="w-full px-4 py-3 rounded-xl bg-white/16 border border-white/25 text-white placeholder-white/60 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="mb-3">
+                        <label className="block text-sm text-white/85 mb-1">OTP</label>
+                        <input
+                          type="text"
+                          name="otp"
+                          value={forgotForm.otp}
+                          onChange={handleForgotChange}
+                          placeholder="Enter 6-digit OTP"
+                          disabled={forgotLoading}
+                          className="w-full px-4 py-3 rounded-xl bg-white/16 border border-white/25 text-white placeholder-white/60 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
+                        />
+                      </div>
+                      <div className="mb-3">
+                        <label className="block text-sm text-white/85 mb-1">New Password</label>
+                        <input
+                          type="password"
+                          name="newPassword"
+                          value={forgotForm.newPassword}
+                          onChange={handleForgotChange}
+                          placeholder="Create a new password"
+                          disabled={forgotLoading}
+                          className="w-full px-4 py-3 rounded-xl bg-white/16 border border-white/25 text-white placeholder-white/60 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
+                        />
+                      </div>
+                      <div className="flex justify-end mb-2">
+                        <button
+                          type="button"
+                          onClick={handleResendOtp}
+                          disabled={forgotLoading}
+                          className="text-xs text-yellow-300 hover:underline disabled:opacity-50"
+                        >
+                          Resend OTP
+                        </button>
+                      </div>
+                      <div className="mb-4">
+                        <label className="block text-sm text-white/85 mb-1">Confirm Password</label>
+                        <input
+                          type="password"
+                          name="confirmPassword"
+                          value={forgotForm.confirmPassword}
+                          onChange={handleForgotChange}
+                          placeholder="Re-enter new password"
+                          disabled={forgotLoading}
+                          className="w-full px-4 py-3 rounded-xl bg-white/16 border border-white/25 text-white placeholder-white/60 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  <div className="flex items-center justify-between gap-3">
+                    <button
+                      type="button"
+                      onClick={handleForgotToggle}
+                      className="text-sm text-white/80 hover:text-white underline-offset-2"
+                    >
+                      Back to Login
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={forgotLoading}
+                      className="px-5 py-3 bg-yellow-400 text-gray-900 font-semibold rounded-xl shadow-sm hover:bg-yellow-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {forgotLoading
+                        ? "Please wait..."
+                        : forgotForm.step === "request"
+                        ? "Send OTP"
+                        : "Update Password"}
+                    </button>
+                  </div>
+                </motion.form>
+              ) : (
+                /* LOGIN */
+                <motion.form
+                  key="login"
+                  layout
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -12 }}
+                  transition={{ duration: 0.32, ease: "easeInOut" }}
+                  onSubmit={isBusiness ? handleBusinessLogin : handleCustomerLogin}
+                >
+                  <h2 className="text-2xl font-semibold text-center mb-5">
+                    {isBusiness ? "Business Login" : "Welcome Back"}
+                  </h2>
+
+                  {isBusiness && (
+                    <div className="mb-4">
+                      <label className="block text-sm text-white/85 mb-1">Company ID</label>
+                      <input
+                        type="text"
+                        name="companyId"
+                        value={formData.companyId}
+                        onChange={handleChange}
+                        placeholder="Your Company ID"
+                        disabled={loading}
+                        className="w-full px-4 py-3 rounded-xl bg-white/16 border border-white/25 text-white placeholder-white/60 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
+                      />
+                    </div>
+                  )}
+
                   <div className="mb-4">
-                    <label className="block text-sm text-white/85 mb-1">Company ID</label>
+                    <label className="block text-sm text-white/85 mb-1">
+                      {isBusiness ? "Business Email" : "Email"}
+                    </label>
                     <input
-                      type="text"
-                      name="companyId"
-                      value={formData.companyId}
+                      type="email"
+                      name="email"
+                      value={formData.email}
                       onChange={handleChange}
-                      placeholder="Your Company ID"
+                      placeholder="you@example.com"
                       disabled={loading}
                       className="w-full px-4 py-3 rounded-xl bg-white/16 border border-white/25 text-white placeholder-white/60 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
                     />
                   </div>
-                )}
 
-                <div className="mb-4">
-                  <label className="block text-sm text-white/85 mb-1">
-                    {isBusiness ? "Business Email" : "Email"}
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="you@example.com"
+                  <div className="mb-3">
+                    <label className="block text-sm text-white/85 mb-1">Password</label>
+                    <input
+                      type="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="••••••••"
+                      disabled={loading}
+                      className="w-full px-4 py-3 rounded-xl bg-white/16 border border-white/25 text-white placeholder-white/60 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
+                    />
+                  </div>
+
+                  <div className="flex justify-end mb-5">
+                    <button
+                      type="button"
+                      onClick={handleForgotToggle}
+                      className="text-sm text-yellow-300 hover:underline"
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
+
+                  <button
+                    type="submit"
                     disabled={loading}
-                    className="w-full px-4 py-3 rounded-xl bg-white/16 border border-white/25 text-white placeholder-white/60 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
-                  />
-                </div>
-
-                <div className="mb-3">
-                  <label className="block text-sm text-white/85 mb-1">Password</label>
-                  <input
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    placeholder="••••••••"
-                    disabled={loading}
-                    className="w-full px-4 py-3 rounded-xl bg-white/16 border border-white/25 text-white placeholder-white/60 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
-                  />
-                </div>
-
-                <div className="flex justify-end mb-5">
-                  <button type="button" className="text-sm text-yellow-300 hover:underline">
-                    Forgot Password?
+                    className="w-full py-3 bg-yellow-400 text-gray-900 font-semibold rounded-xl shadow-sm hover:bg-yellow-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? "Logging in..." : isBusiness ? "Business Login" : "Login"}
                   </button>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-3 bg-yellow-400 text-gray-900 font-semibold rounded-xl shadow-sm hover:bg-yellow-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? "Logging in..." : isBusiness ? "Business Login" : "Login"}
-                </button>
-              </motion.form>
+                </motion.form>
+              )
             ) : (
               /* SIGNUP */
               <motion.form

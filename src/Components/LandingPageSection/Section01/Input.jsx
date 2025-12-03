@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import RoutingService from "../../../services/routingService";
+import CabLoadingScreen from "../../Loading/CabLoadingScreen";
 
 export default function Input() {
   const [rideType, setRideType] = useState("airport");
@@ -12,6 +14,8 @@ export default function Input() {
   // ADDED: pickup date/time state (behavior only — UI unchanged)
   const [pickupDate, setPickupDate] = useState("");
   const [pickupTime, setPickupTime] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const navigate = useNavigate();
 
@@ -48,40 +52,77 @@ export default function Input() {
     setTimeout(() => setter(false), 150);
   };
 
-  // ADDED: navigation handler (only logic, no UI change)
-  const onBook = (e) => {
+  // ADDED: navigation handler with validation and calculation
+  const onBook = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
 
+    // Clear previous errors
+    setError(null);
+
+    // Basic validation
     if (!fromQuery || !toQuery) {
-      return alert("Please enter both From and To");
+      setError("Please enter both From and To locations");
+      return;
     }
 
-    navigate("/cab-booking", {
-      state: {
-        from: fromQuery,
-        to: toQuery,
-        pickupDate,
-        pickupTime,
-        rideType,
-      },
-    });
+    if (fromQuery.trim().toLowerCase() === toQuery.trim().toLowerCase()) {
+      setError("Pickup and drop locations cannot be the same");
+      return;
+    }
+
+    // Start loading
+    setIsLoading(true);
+
+    try {
+      // Validate and calculate distance
+      const metrics = await RoutingService.getDistanceAndDuration(fromQuery, toQuery);
+      
+      // Check if calculation was successful
+      if (!metrics || !metrics.distanceKm) {
+        throw new Error("Unable to calculate distance. Please check your locations.");
+      }
+
+      // If successful, navigate to cab-booking page
+      navigate("/cab-booking", {
+        state: {
+          from: fromQuery,
+          to: toQuery,
+          pickupDate,
+          pickupTime,
+          rideType,
+          distanceKm: metrics.distanceKm,
+        },
+      });
+    } catch (err) {
+      console.error("Location validation error:", err);
+      setError(
+        err.message || 
+        "Unable to find or calculate route between these locations. Please check the location names and try again."
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    // Note: if your header is fixed, make sure your page wrapper (e.g. <main>) has top padding like `pt-16`
-    <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className="
-        bg-white/15 backdrop-blur-md border border-white/30 
-        rounded-3xl p-4 md:p-6 lg:p-8
-        mx-auto max-w-2xl w-[95%] 
-        relative z-40
-        /* keep component from exceeding viewport - allow inner scroll */
-        max-h-[calc(100vh-140px)] overflow-y-auto
-      "
-    >
+    <>
+      {/* Loading Screen */}
+      {isLoading && <CabLoadingScreen message="Validating locations and calculating route..." />}
+
+      {/* Note: if your header is fixed, make sure your page wrapper (e.g. <main>) has top padding like `pt-16` */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="
+          bg-white/15 backdrop-blur-md border border-white/30 
+          rounded-3xl p-4 md:p-6 lg:p-8
+          mx-auto max-w-2xl w-[95%] 
+          relative z-40
+          /* keep component from exceeding viewport - allow inner scroll */
+          max-h-[calc(100vh-140px)] overflow-y-auto
+        "
+      >
       {/* Ride Type Buttons */}
       <div className="flex justify-center gap-3 mb-5 flex-wrap">
         {[
@@ -249,17 +290,49 @@ export default function Input() {
         </motion.form>
       </AnimatePresence>
 
-      {/* Book Button */}
-      <div className="text-center mt-5 pb-3">
-        <motion.button
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-          onClick={onBook} // ADDED only this prop
-          className="px-8 py-2 bg-yellow-400 text-gray-900 font-semibold rounded-lg hover:bg-yellow-300 transition duration-200 shadow-md"
-        >
-          🚖 Book Ride
-        </motion.button>
-      </div>
-    </motion.div>
+        {/* Error Message */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="mt-4 p-4 bg-red-100 border border-red-300 rounded-lg text-red-700 text-sm"
+          >
+            <div className="flex items-start gap-2">
+              <svg
+                className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+              <div>
+                <div className="font-semibold mb-1">Error</div>
+                <div>{error}</div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Book Button */}
+        <div className="text-center mt-5 pb-3">
+          <motion.button
+            whileHover={{ scale: isLoading ? 1 : 1.03 }}
+            whileTap={{ scale: isLoading ? 1 : 0.97 }}
+            onClick={onBook}
+            disabled={isLoading}
+            className="px-8 py-2 bg-yellow-400 text-gray-900 font-semibold rounded-lg hover:bg-yellow-300 transition duration-200 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? "⏳ Processing..." : "🚖 Book Ride"}
+          </motion.button>
+        </div>
+      </motion.div>
+    </>
   );
 }
