@@ -85,8 +85,11 @@ export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
       setSuccess(result.message);
       setTimeout(() => {
         onClose();
-        // Optional: Refresh page or redirect
-        // window.location.reload();
+        // If logged-in user is an admin, go directly to admin panel
+        const role = result.data?.user?.role;
+        if (role && (role === "admin" || role === "ADMIN")) {
+          window.location.href = "/admin";
+        }
       }, 1500);
     } else {
       setError(result.message);

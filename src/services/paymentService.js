@@ -2,7 +2,7 @@
 // Helper utilities to integrate Razorpay Checkout from the frontend.
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api/v1";
 
 /**
  * Get authentication token from localStorage
@@ -39,7 +39,7 @@ export function loadRazorpayScript() {
 /**
  * Call backend to create an order.
  * Expects backend endpoint: POST /api/v1/payments/create-order
- * (Base URL taken from VITE_API_BASE_URL).
+ * (Base URL taken from VITE_API_BASE_URL, which should include `/api/v1`).
  */
 export async function createPaymentOrder(payload) {
   try {
@@ -52,14 +52,11 @@ export async function createPaymentOrder(payload) {
       headers.Authorization = `Bearer ${token}`;
     }
 
-    const response = await fetch(
-      `${API_BASE_URL}/v1/payments/create-order`,
-      {
-        method: "POST",
-        headers,
-        body: JSON.stringify(payload),
-      }
-    );
+    const response = await fetch(`${API_BASE_URL}/payments/create-order`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload),
+    });
 
     const data = await response.json().catch(() => ({}));
 
@@ -104,7 +101,7 @@ export async function verifyAndBookPayment(payload) {
     }
 
     const response = await fetch(
-      `${API_BASE_URL}/v1/payments/verify-and-book`,
+      `${API_BASE_URL}/payments/verify-and-book`,
       {
         method: "POST",
         headers,

@@ -193,7 +193,7 @@ export default function BookingDetailsMain({
               <li>State tax</li>
               <li>Parking charges</li>
               <li>Waiting charges after 45 mins (₹100 / 30 mins)</li>
-              <li>Fare beyond 260 kms (₹19 / km)</li>
+              <li>Fare beyond {distanceKm} kms (₹19 / km)</li>
             </ul>
           </div>
         </div>
