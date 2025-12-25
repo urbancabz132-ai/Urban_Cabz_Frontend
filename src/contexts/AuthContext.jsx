@@ -45,6 +45,7 @@ export function AuthProvider({ children }) {
   const logout = useCallback(() => {
     clearAuthStorage();
     persistProfile(null);
+    localStorage.removeItem("isAdmin");
   }, [persistProfile]);
 
   const refreshProfile = useCallback(async () => {
@@ -89,6 +90,14 @@ export function AuthProvider({ children }) {
       if (result.success) {
         if (result.data?.user) {
           persistProfile(result.data.user);
+          // Check if user is admin - the redirect will be handled by App.jsx
+          const isAdmin = result.data.user?.role?.toLowerCase() === "admin";
+          if (isAdmin) {
+            // Store admin flag for immediate redirect
+            localStorage.setItem("isAdmin", "true");
+          } else {
+            localStorage.removeItem("isAdmin");
+          }
         } else {
           await refreshProfile();
         }

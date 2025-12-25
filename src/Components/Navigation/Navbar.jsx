@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
-import LoginModal from "../../Model/Login_SignUp_Model";
+import LoginModal from "../../models/LoginModal";
 import ProfileModal from "../Profile/ProfileModal";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function Navbar({ variant = "customer" }) {
   const [showLogin, setShowLogin] = useState(false);

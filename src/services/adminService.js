@@ -6,12 +6,19 @@ const API_BASE_URL =
 
 function getAuthToken() {
   const userType = localStorage.getItem("userType");
-  if (userType === "customer") {
+  if (userType === "admin") {
+    return localStorage.getItem("adminToken");
+  } else if (userType === "customer") {
     return localStorage.getItem("customerToken");
   } else if (userType === "business") {
     return localStorage.getItem("businessToken");
   }
-  return null;
+  // Fallback: try any token so admin check still works if userType not set
+  return (
+    localStorage.getItem("adminToken") ||
+    localStorage.getItem("customerToken") ||
+    localStorage.getItem("businessToken")
+  );
 }
 
 function buildAuthHeaders() {
@@ -145,4 +152,185 @@ export async function upsertTaxiAssignment(bookingId, payload) {
   }
 }
 
+// ===================== BOOKING LIFECYCLE OPERATIONS =====================
 
+/**
+ * Update booking status (start trip, end trip)
+ */
+export async function updateBookingStatus(bookingId, status, reason = "") {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/admin/bookings/${bookingId}/status`,
+      {
+        method: "PATCH",
+        headers: buildAuthHeaders(),
+        body: JSON.stringify({ status, reason }),
+      }
+    );
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return { success: false, message: data.message || "Failed to update status" };
+    }
+    return { success: true, data, message: data.message };
+  } catch (error) {
+    console.error("updateBookingStatus error:", error);
+    return { success: false, message: "Network error" };
+  }
+}
+
+/**
+ * Complete trip with fare adjustments
+ */
+export async function completeTrip(bookingId, payload) {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/admin/bookings/${bookingId}/complete`,
+      {
+        method: "POST",
+        headers: buildAuthHeaders(),
+        body: JSON.stringify(payload),
+      }
+    );
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return { success: false, message: data.message || "Failed to complete trip" };
+    }
+    return { success: true, data, message: data.message };
+  } catch (error) {
+    console.error("completeTrip error:", error);
+    return { success: false, message: "Network error" };
+  }
+}
+
+/**
+ * Cancel booking with reason
+ */
+export async function cancelBooking(bookingId, reason) {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/admin/bookings/${bookingId}/cancel`,
+      {
+        method: "POST",
+        headers: buildAuthHeaders(),
+        body: JSON.stringify({ reason }),
+      }
+    );
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return { success: false, message: data.message || "Failed to cancel booking" };
+    }
+    return { success: true, data, message: data.message };
+  } catch (error) {
+    console.error("cancelBooking error:", error);
+    return { success: false, message: "Network error" };
+  }
+}
+
+/**
+ * Get booking notes
+ */
+export async function getBookingNotes(bookingId) {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/admin/bookings/${bookingId}/notes`,
+      {
+        method: "GET",
+        headers: buildAuthHeaders(),
+      }
+    );
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return { success: false, message: data.message || "Failed to fetch notes" };
+    }
+    return { success: true, data };
+  } catch (error) {
+    console.error("getBookingNotes error:", error);
+    return { success: false, message: "Network error" };
+  }
+}
+
+/**
+ * Add booking note
+ */
+export async function addBookingNote(bookingId, content) {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/admin/bookings/${bookingId}/notes`,
+      {
+        method: "POST",
+        headers: buildAuthHeaders(),
+        body: JSON.stringify({ content }),
+      }
+    );
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return { success: false, message: data.message || "Failed to add note" };
+    }
+    return { success: true, data, message: data.message };
+  } catch (error) {
+    console.error("addBookingNote error:", error);
+    return { success: false, message: "Network error" };
+  }
+}
+
+// ===================== HISTORY & PENDING PAYMENT OPERATIONS =====================
+
+/**
+ * Fetch completed bookings for History table
+ */
+export async function fetchCompletedBookings() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/history/completed`, {
+      method: "GET",
+      headers: buildAuthHeaders(),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return { success: false, message: data.message || "Unable to load completed bookings" };
+    }
+    return { success: true, data };
+  } catch (error) {
+    console.error("fetchCompletedBookings error:", error);
+    return { success: false, message: "Network error" };
+  }
+}
+
+/**
+ * Fetch cancelled bookings for Cancelled History table
+ */
+export async function fetchCancelledBookings() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/history/cancelled`, {
+      method: "GET",
+      headers: buildAuthHeaders(),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return { success: false, message: data.message || "Unable to load cancelled bookings" };
+    }
+    return { success: true, data };
+  } catch (error) {
+    console.error("fetchCancelledBookings error:", error);
+    return { success: false, message: "Network error" };
+  }
+}
+
+/**
+ * Fetch pending payment bookings
+ */
+export async function fetchPendingPayments() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/pending-payments`, {
+      method: "GET",
+      headers: buildAuthHeaders(),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return { success: false, message: data.message || "Unable to load pending payments" };
+    }
+    return { success: true, data };
+  } catch (error) {
+    console.error("fetchPendingPayments error:", error);
+    return { success: false, message: "Network error" };
+  }
+}

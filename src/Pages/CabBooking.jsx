@@ -22,10 +22,10 @@ export default function CabBooking() {
   const listings = [
     {
       id: 1,
-      name: "Swift Dzire or Similar",
+      name: "Swift Dzire",
       seats: 4,
       bags: 2,
-      basePrice: 12,
+      basePrice: 13,
       tags: ["AC", "Music System", "Comfortable"],
       rating: 4.5,
       vehicleType: "Sedan",
@@ -33,26 +33,49 @@ export default function CabBooking() {
     },
     {
       id: 2,
-      name: "Toyota Innova or Similar",
-      seats: 7,
-      bags: 4,
-      basePrice: 18,
-      tags: ["Spacious", "AC", "Premium"],
-      rating: 4.7,
-      vehicleType: "SUV",
-      image: "/Inova.jpg", 
+      name: "Toyota Etios",
+      seats: 4,
+      bags: 2,
+      basePrice: 13,
+      tags: ["AC", "Music System", "Comfortable"],
+      rating: 4.3,
+      vehicleType: "Sedan",
+      image: "/etios.jpeg",
     },
     {
       id: 3,
-      name: "Maruti Ertiga or Similar",
+      name: "Toyota Innova Crysta",
+      seats: 7,
+      bags: 4,
+      basePrice: 22,
+      tags: ["Spacious", "AC", "Premium"],
+      rating: 4.7,
+      vehicleType: "SUV",
+      image: "/Inova.jpg",
+    },
+    {
+      id: 4,
+      name: "Toyota Innova hycross",
+      seats: 7,
+      bags: 4,
+      basePrice: 25,
+      tags: ["Spacious", "AC", "Premium"],
+      rating: 4.7,
+      vehicleType: "SUV",
+      image: "/Hycross.avif",
+    },
+    {
+      id: 5,
+      name: "Tempo traveler",
       seats: 6,
       bags: 3,
-      basePrice: 15,
+      basePrice: 30,
       tags: ["Family Car", "AC", "Spacious"],
       rating: 4.4,
-      vehicleType: "MUV",
-      image: "Ertiga.avif",
+      vehicleType: "LCV",
+      image: "traveller.webp",
     },
+
   ];
 
   return (
@@ -67,43 +90,43 @@ export default function CabBooking() {
           shadow-xl 
           border border-gray-700
         ">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
 
-    {/* Left — ride info */}
-    <div className="space-y-1">
-      <div className="text-sm text-gray-300 font-medium tracking-wide">
-        {rideType === "airport" ? "✈️ Airport Transfer" : "🚗 " + rideType}
-      </div>
+            {/* Left — ride info */}
+            <div className="space-y-1">
+              <div className="text-sm text-gray-300 font-medium tracking-wide">
+                {rideType === "airport" ? "✈️ Airport Transfer" : "🚗 " + rideType}
+              </div>
 
-      <div className="text-3xl font-extrabold flex items-center gap-2">
-        <span>{from}</span>
-        <span className="text-yellow-400">→</span>
-        <span>{to}</span>
-      </div>
-    </div>
+              <div className="text-3xl font-extrabold flex items-center gap-2">
+                <span>{from}</span>
+                <span className="text-yellow-400">→</span>
+                <span>{to}</span>
+              </div>
+            </div>
 
-    {/* Divider (mobile only) */}
-    <div className="block md:hidden border-t border-gray-700"></div>
+            {/* Divider (mobile only) */}
+            <div className="block md:hidden border-t border-gray-700"></div>
 
-    {/* Right — date/time */}
-    <div className="text-right space-y-1">
-      <div className="text-gray-300 text-sm">Pickup Date & Time</div>
-      <div className="font-semibold text-xl">
-        {pickupDate} • <span className="text-yellow-400">{pickupTime}</span>
-      </div>
-    </div>
-  </div>
-</div>
+            {/* Right — date/time */}
+            <div className="text-right space-y-1">
+              <div className="text-gray-300 text-sm">Pickup Date & Time</div>
+              <div className="font-semibold text-xl">
+                {pickupDate} • <span className="text-yellow-400">{pickupTime}</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
 
         {/* Main layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 items-start">
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm border border-gray-100">
               <h3 className="font-bold text-slate-800 mb-2 text-base sm:text-lg">Available Vehicles</h3>
               <p className="text-sm sm:text-base text-slate-600">
-                {distanceKm 
-                  ? `Prices calculated for ${distanceKm} km journey` 
+                {distanceKm
+                  ? `Prices calculated for ${distanceKm} km journey`
                   : 'Calculating distance...'}
               </p>
             </div>
@@ -136,7 +159,7 @@ export default function CabBooking() {
             </div>
           </div>
 
-          <div>
+          <div className="lg:sticky lg:top-28">
             <BookingSidebar
               from={from}
               to={to}

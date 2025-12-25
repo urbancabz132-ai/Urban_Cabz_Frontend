@@ -70,18 +70,18 @@ export default function BookingSidebar({ from, to, pickupDate, pickupTime, onDis
     };
   }, [from, to, onDistanceCalculated]);
 
-  const distanceDisplay = loading 
-    ? "Calculating..." 
+  const distanceDisplay = loading
+    ? "Calculating..."
     : tripMetrics.distanceText || "—";
 
-  const durationDisplay = loading 
-    ? "Calculating..." 
+  const durationDisplay = loading
+    ? "Calculating..."
     : tripMetrics.durationText || "—";
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-5 lg:sticky lg:top-28">
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-3 sm:p-5 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
       {/* Map Preview */}
-      <div className="h-40 sm:h-48 rounded-xl mb-4 overflow-hidden bg-gray-100 relative border border-gray-200">
+      <div className="h-32 sm:h-48 rounded-xl mb-3 overflow-hidden bg-gray-100 relative border border-gray-200">
         {loading ? (
           <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100">
             <div className="text-center">
@@ -121,7 +121,7 @@ export default function BookingSidebar({ from, to, pickupDate, pickupTime, onDis
 
       {/* Distance & Duration Info Below Map */}
       {tripMetrics.distanceKm && (
-        <div className="mb-4 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+        <div className="mb-3 p-2.5 sm:p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
             <div className="flex items-center gap-2 text-blue-700">
               <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -147,58 +147,58 @@ export default function BookingSidebar({ from, to, pickupDate, pickupTime, onDis
       {/* Trip Details */}
       <div className="space-y-4 sm:space-y-5">
         <div>
-          <div className="font-bold text-slate-800 mb-3 sm:mb-4 flex items-center gap-2 text-base sm:text-lg">
-            <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="font-bold text-slate-800 mb-2 sm:mb-4 flex items-center gap-2 text-sm sm:text-lg">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
             <span>Your Trip</span>
           </div>
-          
-          <div className="space-y-3">
+
+          <div className="space-y-2.5 sm:space-y-3">
             {/* Pickup Location */}
-            <div className="flex gap-3 p-3 sm:p-4 bg-emerald-50 rounded-xl border border-emerald-200 hover:border-emerald-300 transition-colors">
-              <div className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-sm sm:text-base shadow-sm">
+            <div className="flex gap-2.5 p-2.5 sm:p-4 bg-emerald-50 rounded-xl border border-emerald-200 hover:border-emerald-300 transition-colors">
+              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-xs sm:text-base shadow-sm">
                 A
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-xs text-emerald-700 font-bold mb-1 uppercase tracking-wide">Pickup</div>
-                <div className="text-sm sm:text-base text-slate-800 break-words font-medium">{from}</div>
+                <div className="text-[10px] text-emerald-700 font-bold mb-0.5 uppercase tracking-wide">Pickup</div>
+                <div className="text-xs sm:text-base text-slate-800 break-words font-medium">{from}</div>
               </div>
             </div>
 
             {/* Drop Location */}
-            <div className="flex gap-3 p-3 sm:p-4 bg-red-50 rounded-xl border border-red-200 hover:border-red-300 transition-colors">
-              <div className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-red-500 flex items-center justify-center text-white font-bold text-sm sm:text-base shadow-sm">
+            <div className="flex gap-2.5 p-2.5 sm:p-4 bg-red-50 rounded-xl border border-red-200 hover:border-red-300 transition-colors">
+              <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-red-500 flex items-center justify-center text-white font-bold text-xs sm:text-base shadow-sm">
                 B
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-xs text-red-700 font-bold mb-1 uppercase tracking-wide">Drop</div>
-                <div className="text-sm sm:text-base text-slate-800 break-words font-medium">{to}</div>
+                <div className="text-[10px] text-red-700 font-bold mb-0.5 uppercase tracking-wide">Drop</div>
+                <div className="text-xs sm:text-base text-slate-800 break-words font-medium">{to}</div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Date & Time Info */}
-        <div className="border-t border-gray-200 pt-4 space-y-3">
-          <div className="flex items-center justify-between text-sm sm:text-base">
+        <div className="border-t border-gray-100 pt-3 sm:pt-4 space-y-2 sm:space-y-3">
+          <div className="flex items-center justify-between text-xs sm:text-base">
             <div className="flex items-center gap-2 text-slate-600">
-              <svg className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-3.5 h-3.5 sm:w-5 sm:h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               <span className="font-medium">Date</span>
             </div>
-            <div className="text-slate-900 font-semibold text-sm sm:text-base">{pickupDate || "—"}</div>
+            <div className="text-slate-900 font-semibold">{pickupDate || "—"}</div>
           </div>
 
-          <div className="flex items-center justify-between text-sm sm:text-base">
+          <div className="flex items-center justify-between text-xs sm:text-base">
             <div className="flex items-center gap-2 text-slate-600">
-              <svg className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-3.5 h-3.5 sm:w-5 sm:h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span className="font-medium">Time</span>
             </div>
-            <div className="text-slate-900 font-semibold text-sm sm:text-base">{pickupTime || "—"}</div>
+            <div className="text-slate-900 font-semibold">{pickupTime || "—"}</div>
           </div>
         </div>
       </div>

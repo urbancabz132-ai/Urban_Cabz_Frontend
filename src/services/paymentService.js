@@ -155,6 +155,14 @@ export async function initiateRazorpayPayment({
     };
   }
 
+  // Basic required fields before hitting backend validators
+  if (!bookingDetails.from || !bookingDetails.to) {
+    return {
+      success: false,
+      message: "Pickup and drop locations are required.",
+    };
+  }
+
   const sdkLoaded = await loadRazorpayScript();
   if (!sdkLoaded) {
     return {
@@ -166,14 +174,15 @@ export async function initiateRazorpayPayment({
   // Transform bookingDetails to match backend expected format
   const formatScheduledAt = (date, time) => {
     if (!date || !time) return null;
-    try {
-      // Combine date and time into ISO string
-      const dateTimeString = `${date}T${time}:00`;
-      return new Date(dateTimeString).toISOString();
-    } catch (error) {
-      console.error("Error formatting scheduledAt:", error);
+    // Defensive: ignore placeholder values
+    if (date === "—" || time === "—") return null;
+    const dateTimeString = `${date}T${time}:00`;
+    const ts = Date.parse(dateTimeString);
+    if (Number.isNaN(ts)) {
+      console.warn("Invalid scheduledAt value, skipping:", { date, time });
       return null;
     }
+    return new Date(ts).toISOString();
   };
 
   const createOrderPayload = {
@@ -185,6 +194,7 @@ export async function initiateRazorpayPayment({
     scheduledAt: formatScheduledAt(bookingDetails.pickupDate, bookingDetails.pickupTime),
     distanceKm: bookingDetails.distanceKm || 0,
     estimatedFare: bookingDetails.totalFare || amount,
+    carModel: bookingDetails.vehicleName || "",
   };
 
   const orderResult = await createPaymentOrder(createOrderPayload);

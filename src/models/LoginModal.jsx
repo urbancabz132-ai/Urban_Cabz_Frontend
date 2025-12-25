@@ -1,6 +1,7 @@
 // src/Model/Login_SignUp_Model.jsx
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import {
   customerSignup,
   businessLogin,
@@ -8,7 +9,7 @@ import {
   requestPasswordReset,
   completePasswordReset,
 } from "../services/authService";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../contexts/AuthContext";
 
 const initialForgotState = {
   identifier: "",
@@ -23,6 +24,7 @@ export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
   const [isLogin, setIsLogin] = useState(true);
   const isBusiness = variant === "business";
   const { loginCustomer } = useAuth();
+  const navigate = useNavigate();
 
   // Form states
   const [formData, setFormData] = useState({
@@ -83,14 +85,18 @@ export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
 
     if (result.success) {
       setSuccess(result.message);
-      setTimeout(() => {
+      // If logged-in user is an admin, redirect to admin panel immediately
+      const role = result.data?.user?.role;
+      if (role && (role.toLowerCase() === "admin")) {
+        // Close modal and redirect immediately (no delay for admin)
         onClose();
-        // If logged-in user is an admin, go directly to admin panel
-        const role = result.data?.user?.role;
-        if (role && (role === "admin" || role === "ADMIN")) {
-          window.location.href = "/admin";
-        }
-      }, 1500);
+        navigate("/admin", { replace: true });
+      } else {
+        // Regular customers: show success message briefly, then close
+        setTimeout(() => {
+          onClose();
+        }, 1500);
+      }
     } else {
       setError(result.message);
     }
@@ -367,7 +373,7 @@ export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ duration: 0.28, ease: "easeOut" }}
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-md bg-white/12 backdrop-blur-2xl border border-white/25 rounded-3xl shadow-2xl text-white overflow-hidden"
+        className="relative w-full max-w-md bg-white/15 backdrop-blur-md border border-white/30 rounded-3xl shadow-2xl text-white overflow-hidden"
       >
         {/* Close */}
         <button
@@ -378,26 +384,31 @@ export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
           ×
         </button>
 
-        {/* Tabs */}
-        <div className="flex justify-center gap-0 mt-4 p-2">
-          <button
-            onClick={() => handleTabSwitch(true)}
-            disabled={loading}
-            className={`px-5 py-2 rounded-l-xl font-semibold transition-colors ${
-              isLogin ? "bg-yellow-400 text-gray-900 shadow-md" : "bg-white/10 text-white hover:bg-white/20"
-            } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
-          >
-            {isBusiness ? "Business Login" : "Login"}
-          </button>
-          <button
-            onClick={() => handleTabSwitch(false)}
-            disabled={loading}
-            className={`px-5 py-2 rounded-r-xl font-semibold transition-colors ${
-              !isLogin ? "bg-yellow-400 text-gray-900 shadow-md" : "bg-white/10 text-white hover:bg-white/20"
-            } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
-          >
-            {isBusiness ? "Business Sign Up" : "Sign Up"}
-          </button>
+        {/* Tabs with Sliding Animation */}
+        <div className="flex justify-center mt-6 mb-2">
+          <div className="bg-black/20 p-1 rounded-full flex gap-1 relative border border-white/10">
+            {[
+              { label: isBusiness ? "Business Login" : "Login", value: true },
+              { label: isBusiness ? "Business Sign Up" : "Sign Up", value: false }
+            ].map((tab) => (
+              <button
+                key={tab.label}
+                onClick={() => !loading && handleTabSwitch(tab.value)}
+                className={`relative z-10 px-6 py-2.5 rounded-full text-sm font-bold transition-colors duration-300 ${isLogin === tab.value ? "text-gray-900" : "text-white/70 hover:text-white"
+                  } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                disabled={loading}
+              >
+                {isLogin === tab.value && (
+                  <motion.div
+                    layoutId="loginTab"
+                    className="absolute inset-0 bg-yellow-400 rounded-full shadow-lg"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                <span className="relative">{tab.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Error/Success Messages */}
@@ -444,7 +455,7 @@ export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
                         onChange={handleForgotChange}
                         placeholder="you@example.com / +91XXXXXXXXXX"
                         disabled={forgotLoading}
-                        className="w-full px-4 py-3 rounded-xl bg-white/16 border border-white/25 text-white placeholder-white/60 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
+                        className="w-full px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 focus:border-yellow-400/50 focus:bg-white/20 text-white placeholder-white/50 focus:ring-4 focus:ring-yellow-400/20 backdrop-blur-sm outline-none transition-all duration-300 font-medium disabled:opacity-50"
                       />
                     </div>
                   ) : (
@@ -458,7 +469,7 @@ export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
                           onChange={handleForgotChange}
                           placeholder="Enter 6-digit OTP"
                           disabled={forgotLoading}
-                          className="w-full px-4 py-3 rounded-xl bg-white/16 border border-white/25 text-white placeholder-white/60 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
+                          className="w-full px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 focus:border-yellow-400/50 focus:bg-white/20 text-white placeholder-white/50 focus:ring-4 focus:ring-yellow-400/20 backdrop-blur-sm outline-none transition-all duration-300 font-medium disabled:opacity-50"
                         />
                       </div>
                       <div className="mb-3">
@@ -470,7 +481,7 @@ export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
                           onChange={handleForgotChange}
                           placeholder="Create a new password"
                           disabled={forgotLoading}
-                          className="w-full px-4 py-3 rounded-xl bg-white/16 border border-white/25 text-white placeholder-white/60 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
+                          className="w-full px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 focus:border-yellow-400/50 focus:bg-white/20 text-white placeholder-white/50 focus:ring-4 focus:ring-yellow-400/20 backdrop-blur-sm outline-none transition-all duration-300 font-medium disabled:opacity-50"
                         />
                       </div>
                       <div className="flex justify-end mb-2">
@@ -492,7 +503,7 @@ export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
                           onChange={handleForgotChange}
                           placeholder="Re-enter new password"
                           disabled={forgotLoading}
-                          className="w-full px-4 py-3 rounded-xl bg-white/16 border border-white/25 text-white placeholder-white/60 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
+                          className="w-full px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 focus:border-yellow-400/50 focus:bg-white/20 text-white placeholder-white/50 focus:ring-4 focus:ring-yellow-400/20 backdrop-blur-sm outline-none transition-all duration-300 font-medium disabled:opacity-50"
                         />
                       </div>
                     </>
@@ -509,13 +520,13 @@ export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
                     <button
                       type="submit"
                       disabled={forgotLoading}
-                      className="px-5 py-3 bg-yellow-400 text-gray-900 font-semibold rounded-xl shadow-sm hover:bg-yellow-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-5 py-3 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-300 hover:to-yellow-400 text-slate-900 font-bold rounded-xl shadow-lg hover:shadow-yellow-400/20 hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     >
                       {forgotLoading
                         ? "Please wait..."
                         : forgotForm.step === "request"
-                        ? "Send OTP"
-                        : "Update Password"}
+                          ? "Send OTP"
+                          : "Update Password"}
                     </button>
                   </div>
                 </motion.form>
@@ -544,7 +555,7 @@ export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
                         onChange={handleChange}
                         placeholder="Your Company ID"
                         disabled={loading}
-                        className="w-full px-4 py-3 rounded-xl bg-white/16 border border-white/25 text-white placeholder-white/60 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
+                        className="w-full px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 focus:border-yellow-400/50 focus:bg-white/20 text-white placeholder-white/50 focus:ring-4 focus:ring-yellow-400/20 backdrop-blur-sm outline-none transition-all duration-300 font-medium disabled:opacity-50"
                       />
                     </div>
                   )}
@@ -560,7 +571,7 @@ export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
                       onChange={handleChange}
                       placeholder="you@example.com"
                       disabled={loading}
-                      className="w-full px-4 py-3 rounded-xl bg-white/16 border border-white/25 text-white placeholder-white/60 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
+                      className="w-full px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 focus:border-yellow-400/50 focus:bg-white/20 text-white placeholder-white/50 focus:ring-2 focus:ring-yellow-400/20 backdrop-blur-sm outline-none transition-all duration-200 disabled:opacity-50"
                     />
                   </div>
 
@@ -573,7 +584,7 @@ export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
                       onChange={handleChange}
                       placeholder="••••••••"
                       disabled={loading}
-                      className="w-full px-4 py-3 rounded-xl bg-white/16 border border-white/25 text-white placeholder-white/60 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
+                      className="w-full px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 focus:border-yellow-400/50 focus:bg-white/20 text-white placeholder-white/50 focus:ring-2 focus:ring-yellow-400/20 backdrop-blur-sm outline-none transition-all duration-200 disabled:opacity-50"
                     />
                   </div>
 
@@ -590,7 +601,7 @@ export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-3 bg-yellow-400 text-gray-900 font-semibold rounded-xl shadow-sm hover:bg-yellow-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full py-3 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-300 hover:to-yellow-400 text-slate-900 font-bold rounded-xl shadow-lg hover:shadow-yellow-400/20 hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   >
                     {loading ? "Logging in..." : isBusiness ? "Business Login" : "Login"}
                   </button>
@@ -622,7 +633,7 @@ export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
                         onChange={handleChange}
                         placeholder="ACME Pvt Ltd"
                         disabled={loading}
-                        className="w-full px-4 py-3 rounded-xl bg-white/16 border border-white/25 text-white placeholder-white/60 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
+                        className="w-full px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 focus:border-yellow-400/50 focus:bg-white/20 text-white placeholder-white/50 focus:ring-4 focus:ring-yellow-400/20 backdrop-blur-sm outline-none transition-all duration-300 font-medium disabled:opacity-50"
                       />
                     </div>
 
@@ -635,7 +646,7 @@ export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
                         onChange={handleChange}
                         placeholder="company@example.com"
                         disabled={loading}
-                        className="w-full px-4 py-3 rounded-xl bg-white/16 border border-white/25 text-white placeholder-white/60 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
+                        className="w-full px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 focus:border-yellow-400/50 focus:bg-white/20 text-white placeholder-white/50 focus:ring-4 focus:ring-yellow-400/20 backdrop-blur-sm outline-none transition-all duration-300 font-medium disabled:opacity-50"
                       />
                     </div>
 
@@ -650,7 +661,7 @@ export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
                         onChange={handleChange}
                         placeholder="GSTIN / Reg No."
                         disabled={loading}
-                        className="w-full px-4 py-3 rounded-xl bg-white/16 border border-white/25 text-white placeholder-white/60 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
+                        className="w-full px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 focus:border-yellow-400/50 focus:bg-white/20 text-white placeholder-white/50 focus:ring-4 focus:ring-yellow-400/20 backdrop-blur-sm outline-none transition-all duration-300 font-medium disabled:opacity-50"
                       />
                     </div>
                   </>
@@ -665,7 +676,7 @@ export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
                         onChange={handleChange}
                         placeholder="John Doe"
                         disabled={loading}
-                        className="w-full px-4 py-3 rounded-xl bg-white/16 border border-white/25 text-white placeholder-white/60 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
+                        className="w-full px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 focus:border-yellow-400/50 focus:bg-white/20 text-white placeholder-white/50 focus:ring-4 focus:ring-yellow-400/20 backdrop-blur-sm outline-none transition-all duration-300 font-medium disabled:opacity-50"
                       />
                     </div>
 
@@ -678,7 +689,7 @@ export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
                         onChange={handleChange}
                         placeholder="+91 9XXXXXXXXX"
                         disabled={loading}
-                        className="w-full px-4 py-3 rounded-xl bg-white/16 border border-white/25 text-white placeholder-white/60 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
+                        className="w-full px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 focus:border-yellow-400/50 focus:bg-white/20 text-white placeholder-white/50 focus:ring-4 focus:ring-yellow-400/20 backdrop-blur-sm outline-none transition-all duration-300 font-medium disabled:opacity-50"
                       />
                     </div>
                   </>
@@ -695,7 +706,7 @@ export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
                     onChange={handleChange}
                     placeholder="you@example.com"
                     disabled={loading}
-                    className="w-full px-4 py-3 rounded-xl bg-white/16 border border-white/25 text-white placeholder-white/60 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
+                    className="w-full px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 focus:border-yellow-400/50 focus:bg-white/20 text-white placeholder-white/50 focus:ring-2 focus:ring-yellow-400/20 backdrop-blur-sm outline-none transition-all duration-200 disabled:opacity-50"
                   />
                 </div>
 
@@ -708,20 +719,20 @@ export default function Login_SignUp_Model({ onClose, variant = "customer" }) {
                     onChange={handleChange}
                     placeholder="Create a password"
                     disabled={loading}
-                    className="w-full px-4 py-3 rounded-xl bg-white/16 border border-white/25 text-white placeholder-white/60 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
+                    className="w-full px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 focus:border-yellow-400/50 focus:bg-white/20 text-white placeholder-white/50 focus:ring-2 focus:ring-yellow-400/20 backdrop-blur-sm outline-none transition-all duration-200 disabled:opacity-50"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 bg-yellow-400 text-gray-900 font-semibold rounded-xl shadow-sm hover:bg-yellow-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-3 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-300 hover:to-yellow-400 text-slate-900 font-bold rounded-xl shadow-lg hover:shadow-yellow-400/20 hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   {loading
                     ? "Creating Account..."
                     : isBusiness
-                    ? "Create Business Account"
-                    : "Sign Up"}
+                      ? "Create Business Account"
+                      : "Sign Up"}
                 </button>
               </motion.form>
             )}

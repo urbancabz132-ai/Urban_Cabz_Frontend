@@ -2,7 +2,7 @@ import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import BookingDetailsMain from "../Components/BookingDetails/BookingDetailsMain";
 import BookingDetailsSidebar from "../Components/BookingDetails/BookingDetailsSidebar";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../contexts/AuthContext";
 import { initiateRazorpayPayment } from "../services/paymentService";
 
 /**
@@ -31,7 +31,7 @@ export default function CabBookingDetails() {
     if (!distanceKm) return 0;
     const billableDistance = distanceKm * (isRoundTrip ? 2 : 1);
     let pricePerKm = basePrice;
-    if (billableDistance > 300) pricePerKm = basePrice * 0.9;
+    // if (billableDistance > 300) pricePerKm = basePrice * 0.9;
     return Math.round(billableDistance * pricePerKm);
   };
 
@@ -120,7 +120,7 @@ export default function CabBookingDetails() {
           </div>
 
           {/* Right: payment summary (floats on large screens) */}
-          <aside>
+          <aside className="lg:sticky lg:top-28">
             <BookingDetailsSidebar price={price} onPayNow={onPayNow} />
           </aside>
         </div>

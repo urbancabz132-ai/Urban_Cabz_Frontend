@@ -4,6 +4,28 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
 const CUSTOMER_PROFILE_KEY = 'customerProfile';
 
+function setAdminSession(token) {
+  if (token) {
+    localStorage.setItem('adminToken', token);
+    localStorage.setItem('userType', 'admin');
+    localStorage.setItem('isAdmin', 'true');
+  }
+}
+
+function clearAdminSession() {
+  localStorage.removeItem('adminToken');
+  localStorage.removeItem('isAdmin');
+}
+
+function isAdminUser(data) {
+  const role =
+    data?.user?.role ||
+    data?.user?.role_name ||
+    data?.role ||
+    data?.user?.roles?.[0];
+  return (role || '').toString().toLowerCase() === 'admin';
+}
+
 function persistCustomerProfile(profile) {
   if (profile) {
     localStorage.setItem(CUSTOMER_PROFILE_KEY, JSON.stringify(profile));
@@ -52,8 +74,13 @@ export async function customerLogin(credentials) {
 
     // Store token if provided
     if (data.token) {
-      localStorage.setItem('customerToken', data.token);
-      localStorage.setItem('userType', 'customer');
+      if (isAdminUser(data)) {
+        setAdminSession(data.token);
+      } else {
+        localStorage.setItem('customerToken', data.token);
+        localStorage.setItem('userType', 'customer');
+        clearAdminSession();
+      }
     }
 
     if (data.user) {
@@ -121,8 +148,13 @@ export async function customerSignup(userData) {
 
     // Store token if provided
     if (data.token) {
-      localStorage.setItem('customerToken', data.token);
-      localStorage.setItem('userType', 'customer');
+      if (isAdminUser(data)) {
+        setAdminSession(data.token);
+      } else {
+        localStorage.setItem('customerToken', data.token);
+        localStorage.setItem('userType', 'customer');
+        clearAdminSession();
+      }
     }
 
     if (data.user) {
@@ -189,8 +221,13 @@ export async function businessLogin(credentials) {
 
     // Store token if provided
     if (data.token) {
-      localStorage.setItem('businessToken', data.token);
-      localStorage.setItem('userType', 'business');
+      if (isAdminUser(data)) {
+        setAdminSession(data.token);
+      } else {
+        localStorage.setItem('businessToken', data.token);
+        localStorage.setItem('userType', 'business');
+        clearAdminSession();
+      }
     }
 
     return {
@@ -255,8 +292,13 @@ export async function businessSignup(businessData) {
 
     // Store token if provided
     if (data.token) {
-      localStorage.setItem('businessToken', data.token);
-      localStorage.setItem('userType', 'business');
+      if (isAdminUser(data)) {
+        setAdminSession(data.token);
+      } else {
+        localStorage.setItem('businessToken', data.token);
+        localStorage.setItem('userType', 'business');
+        clearAdminSession();
+      }
     }
 
     return {
@@ -284,6 +326,7 @@ export async function businessSignup(businessData) {
 export function logout() {
   localStorage.removeItem('customerToken');
   localStorage.removeItem('businessToken');
+  clearAdminSession();
   localStorage.removeItem('userType');
   persistCustomerProfile(null);
 }
@@ -294,12 +337,19 @@ export function logout() {
  */
 export function getAuthToken() {
   const userType = localStorage.getItem('userType');
-  if (userType === 'customer') {
+  if (userType === 'admin') {
+    return localStorage.getItem('adminToken');
+  } else if (userType === 'customer') {
     return localStorage.getItem('customerToken');
   } else if (userType === 'business') {
     return localStorage.getItem('businessToken');
   }
-  return null;
+  // Fallback: return any available token (helps if userType missing)
+  return (
+    localStorage.getItem('adminToken') ||
+    localStorage.getItem('customerToken') ||
+    localStorage.getItem('businessToken')
+  );
 }
 
 /**

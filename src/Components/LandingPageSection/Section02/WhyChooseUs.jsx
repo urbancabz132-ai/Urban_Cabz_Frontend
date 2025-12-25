@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 
 export default function WhyChooseUs({ title, subtitle, features }) {
   return (
-    <section className="w-full py-16 md:py-10  from-gray-50 via-white to-gray-100 flex flex-col items-center px-6">
+    <section className="w-full py-16 md:py-10 flex flex-col items-center px-6 bg-slate-50">
       {/* Title */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -31,7 +31,7 @@ export default function WhyChooseUs({ title, subtitle, features }) {
             viewport={{ once: true }}
             className="p-6 bg-white rounded-2xl shadow-md hover:shadow-xl border border-gray-100 text-center flex flex-col items-center transition-transform duration-300 hover:-translate-y-1"
           >
-            <div className="mb-4 bg-yellow-100 p-4 rounded-full">
+            <div className="mb-4 bg-yellow-100 p-4 rounded-full text-3xl">
               {feature.icon}
             </div>
             <h3 className="text-lg font-semibold text-gray-800 mb-2">

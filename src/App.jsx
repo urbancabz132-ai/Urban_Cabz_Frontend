@@ -86,11 +86,12 @@ const AppLayout = () => {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
 
-  // Optional: if the current user is an admin, keep them inside the admin area
-  // by redirecting any non-admin route back to /admin.
-  // This uses a lightweight check against the /admin/me endpoint.
+  // Check if user is admin - first from localStorage (fast), then verify with backend
   const [checkingAdmin, setCheckingAdmin] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(() => {
+    // Quick check from localStorage (set during login)
+    return localStorage.getItem("isAdmin") === "true";
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -99,11 +100,19 @@ const AppLayout = () => {
         const { fetchAdminMe } = await import("./services/adminService");
         const me = await fetchAdminMe();
         if (!cancelled) {
-          setIsAdmin(!!me.success);
+          const adminStatus = !!me.success;
+          setIsAdmin(adminStatus);
+          // Sync localStorage with actual backend status
+          if (adminStatus) {
+            localStorage.setItem("isAdmin", "true");
+          } else {
+            localStorage.removeItem("isAdmin");
+          }
         }
       } catch {
         if (!cancelled) {
           setIsAdmin(false);
+          localStorage.removeItem("isAdmin");
         }
       } finally {
         if (!cancelled) {
@@ -116,8 +125,20 @@ const AppLayout = () => {
     };
   }, []);
 
-  // While we are figuring out if the user is admin, just render routes normally.
-  if (checkingAdmin) {
+  // If user is an admin (from localStorage or backend check) and tries to access any non-admin page,
+  // immediately redirect them to the admin dashboard.
+  if (isAdmin && !isAdminRoute) {
+    return <Navigate to="/admin" replace />;
+  }
+
+  // While we are checking admin status, if localStorage says admin, redirect immediately
+  // (don't show landing page even briefly)
+  if (checkingAdmin && !isAdminRoute && localStorage.getItem("isAdmin") === "true") {
+    return <Navigate to="/admin" replace />;
+  }
+
+  // While we are checking admin status, show minimal UI for regular users
+  if (checkingAdmin && !isAdminRoute) {
     return (
       <>
         {!isAdminRoute && <Navbar />}
@@ -125,12 +146,6 @@ const AppLayout = () => {
         {!isAdminRoute && <Footer />}
       </>
     );
-  }
-
-  // If user is an admin and tries to access any non-admin page,
-  // immediately push them back to the admin dashboard.
-  if (isAdmin && !isAdminRoute) {
-    return <Navigate to="/admin" replace />;
   }
 
   return (
@@ -144,7 +159,7 @@ const AppLayout = () => {
 
 function App() {
   return (
-    <div className="overflow-x-hidden">
+    <div className="">
       <Router>
         <AppLayout />
       </Router>

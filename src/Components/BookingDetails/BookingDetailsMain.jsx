@@ -1,5 +1,4 @@
-import React from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../contexts/AuthContext";
 
 /**
  * BookingDetailsMain
@@ -15,7 +14,7 @@ export default function BookingDetailsMain({
   distanceKm,
   rideType = "oneway",
   price,
-  onBack = () => {},
+  onBack = () => { },
 }) {
   const { user } = useAuth();
   const {
@@ -115,13 +114,13 @@ export default function BookingDetailsMain({
               <div className="mt-3 flex flex-wrap gap-2">
                 {tags && tags.length
                   ? tags.map((t, i) => (
-                      <span
-                        key={i}
-                        className="text-[11px] bg-slate-100 px-3 py-1 rounded-full border border-slate-200 text-slate-700"
-                      >
-                        {t}
-                      </span>
-                    ))
+                    <span
+                      key={i}
+                      className="text-[11px] bg-slate-100 px-3 py-1 rounded-full border border-slate-200 text-slate-700"
+                    >
+                      {t}
+                    </span>
+                  ))
                   : (
                     <>
                       <span className="text-[11px] bg-slate-100 px-3 py-1 rounded-full border border-slate-200 text-slate-700">

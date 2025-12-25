@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function ProfileModal({ open, onClose }) {
   const { user, updateProfile, logout, loading } = useAuth();
@@ -131,11 +131,10 @@ export default function ProfileModal({ open, onClose }) {
 
               {status.message && (
                 <p
-                  className={`rounded-2xl px-4 py-3 text-sm ${
-                    status.type === "success"
+                  className={`rounded-2xl px-4 py-3 text-sm ${status.type === "success"
                       ? "bg-green-50 text-green-700"
                       : "bg-red-50 text-red-700"
-                  }`}
+                    }`}
                 >
                   {status.message}
                 </p>
