@@ -20,7 +20,6 @@ export default function BookingDetailView({
     const [completeForm, setCompleteForm] = useState({
         actual_km: booking?.distance_km || 0,
         toll_charges: 0,
-        waiting_charges: 0,
     });
     const [form, setForm] = useState({
         driverName: booking?.assign_taxis?.[0]?.driver_name || "",
@@ -433,25 +432,14 @@ export default function BookingDetailView({
                                         Initial Estimate: {booking.distance_km || 0} km. Extra fare will be added for excess.
                                     </p>
                                 </div>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label className="text-[10px] uppercase font-bold text-slate-500 mb-1 block">Toll Charges</label>
-                                        <input
-                                            type="number"
-                                            className="w-full bg-white border border-slate-300 rounded-lg p-2 text-sm text-slate-900 focus:border-indigo-500 outline-none"
-                                            value={completeForm.toll_charges}
-                                            onChange={e => setCompleteForm({ ...completeForm, toll_charges: e.target.value })}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="text-[10px] uppercase font-bold text-slate-500 mb-1 block">Waiting Charges</label>
-                                        <input
-                                            type="number"
-                                            className="w-full bg-white border border-slate-300 rounded-lg p-2 text-sm text-slate-900 focus:border-indigo-500 outline-none"
-                                            value={completeForm.waiting_charges}
-                                            onChange={e => setCompleteForm({ ...completeForm, waiting_charges: e.target.value })}
-                                        />
-                                    </div>
+                                <div>
+                                    <label className="text-[10px] uppercase font-bold text-slate-500 mb-1 block">Toll Charges</label>
+                                    <input
+                                        type="number"
+                                        className="w-full bg-white border border-slate-300 rounded-lg p-2 text-sm text-slate-900 focus:border-indigo-500 outline-none"
+                                        value={completeForm.toll_charges}
+                                        onChange={e => setCompleteForm({ ...completeForm, toll_charges: e.target.value })}
+                                    />
                                 </div>
 
                                 <div className="flex gap-2 pt-2">

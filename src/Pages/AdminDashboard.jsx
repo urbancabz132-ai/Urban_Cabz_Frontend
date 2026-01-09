@@ -2,9 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 
-import AdminStats from "../components/Admin/AdminStats";
-import BookingList from "../components/Admin/BookingList";
-import BookingDetailView from "../components/Admin/BookingDetailView";
+import AdminStats from "../Components/Admin/AdminStats";
+import BookingList from "../Components/Admin/BookingList";
+import BookingDetailView from "../Components/Admin/BookingDetailView";
 import HistoryTable from "../Components/Admin/HistoryTable";
 import {
   fetchAdminBookings,

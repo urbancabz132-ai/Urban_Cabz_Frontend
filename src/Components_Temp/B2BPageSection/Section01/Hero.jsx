@@ -47,9 +47,8 @@ export default function HeroFullCover({
           {titleLines.map((line, idx) => (
             <span
               key={idx}
-              className={`block ${
-                idx === 0 ? "text-3xl sm:text-4xl md:text-5xl" : "text-3xl sm:text-4xl md:text-5xl text-yellow-300"
-              }`}
+              className={`block ${idx === 0 ? "text-3xl sm:text-4xl md:text-5xl" : "text-3xl sm:text-4xl md:text-5xl text-yellow-300"
+                }`}
             >
               {line}
             </span>
@@ -72,7 +71,7 @@ export default function HeroFullCover({
           className="mt-6 flex justify-center gap-3 flex-wrap"
         >
         </motion.div>
-        
+
       </div>
     </section>
   );

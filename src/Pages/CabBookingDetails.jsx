@@ -16,10 +16,27 @@ export default function CabBookingDetails() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  const [passengerDetails, setPassengerDetails] = React.useState({
+    name: user?.name || user?.fullName || "",
+    phone: user?.phone || user?.mobile || "",
+    email: user?.email || "",
+    remarks: ""
+  });
+  const [formErrors, setFormErrors] = React.useState({});
+
+  const handleFormChange = (field, value) => {
+    setPassengerDetails(prev => ({ ...prev, [field]: value }));
+    // Clear error when user types
+    if (formErrors[field]) {
+      setFormErrors(prev => ({ ...prev, [field]: null }));
+    }
+  };
+
   const listing = state?.listing || {};
   const from = state?.from || "Pickup location";
   const to = state?.to || "Drop location";
   const pickupDate = state?.pickupDate || "—";
+  const returnDate = state?.returnDate || "—";
   const pickupTime = state?.pickupTime || "—";
   const distanceKm = state?.distanceKm ?? null;
   const rideType = state?.rideType || "oneway";
@@ -29,17 +46,53 @@ export default function CabBookingDetails() {
 
   const calculatePrice = () => {
     if (!distanceKm) return 0;
-    const billableDistance = distanceKm * (isRoundTrip ? 2 : 1);
-    let pricePerKm = basePrice;
-    // if (billableDistance > 300) pricePerKm = basePrice * 0.9;
-    return Math.round(billableDistance * pricePerKm);
+
+    let billableDistance = 0;
+    const MIN_KM_PER_DAY = 300;
+
+    if (rideType === "oneway" || rideType === "airport") {
+      // One-way: Base 300km
+      billableDistance = Math.max(MIN_KM_PER_DAY, distanceKm);
+    } else if (rideType === "roundtrip") {
+      // Round-trip: 300km * number of days
+      let days = 1;
+      if (pickupDate && returnDate && pickupDate !== "—" && returnDate !== "—") {
+        const start = new Date(pickupDate);
+        const end = new Date(returnDate);
+        const diffTime = Math.abs(end - start);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        days = diffDays + 1; // Include both start and end day
+      }
+
+      const baseKm = days * MIN_KM_PER_DAY;
+      const actualKm = distanceKm * 2;
+      billableDistance = Math.max(baseKm, actualKm);
+    }
+
+    const pricePerKm = basePrice;
+    const total = Math.round(billableDistance * pricePerKm);
+    return { total, billableDistance };
   };
 
-  const price = calculatePrice();
+  const { total: price, billableDistance } = calculatePrice();
 
   const goBack = () => navigate(-1);
 
   const onPayNow = async (amount) => {
+    // Validate Form
+    const errors = {};
+    if (!passengerDetails.name.trim()) errors.name = "Name is required";
+    if (!passengerDetails.phone.trim()) errors.phone = "Phone is required";
+    else if (!/^\d{10}$/.test(passengerDetails.phone.replace(/\D/g, ''))) errors.phone = "Invalid phone number (10 digits required)";
+    if (!passengerDetails.email.trim()) errors.email = "Email is required";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(passengerDetails.email)) errors.email = "Invalid email format";
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      alert("Please correct the errors in passenger details.");
+      return;
+    }
+
     const bookingDetails = {
       amount,
       totalFare: price,
@@ -50,15 +103,18 @@ export default function CabBookingDetails() {
       from,
       to,
       pickupDate,
+      returnDate,
       pickupTime,
-      distanceKm,
+      distanceKm: billableDistance,
       rideType,
+      passengerDetails, // Pass collected details
     };
 
+    // Use user details from form for prefill
     const prefill = {
-      name: user?.fullName || user?.name || "",
-      email: user?.email || "",
-      contact: user?.mobile || user?.phone || "",
+      name: passengerDetails.name,
+      email: passengerDetails.email,
+      contact: passengerDetails.phone,
     };
 
     const result = await initiateRazorpayPayment({
@@ -112,9 +168,12 @@ export default function CabBookingDetails() {
               to={to}
               pickupDate={pickupDate}
               pickupTime={pickupTime}
-              distanceKm={distanceKm}
+              distanceKm={billableDistance}
               rideType={rideType}
               price={price}
+              formData={passengerDetails}
+              formErrors={formErrors}
+              onFormChange={handleFormChange}
               onBack={goBack}
             />
           </div>

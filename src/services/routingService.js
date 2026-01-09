@@ -66,6 +66,85 @@ const RoutingService = {
     return null;
   },
 
+  async getSuggestions(query) {
+    const normalizedQuery = normalizeAddress(query);
+    if (!normalizedQuery || normalizedQuery.length < 2) return [];
+
+    // Check memory cache first (simple debounce/cache strategy)
+    const cacheKey = `suggest_${normalizedQuery}`;
+    if (geocodeMemoryCache.has(cacheKey)) {
+      return geocodeMemoryCache.get(cacheKey);
+    }
+
+    try {
+      // Use Nominatim for suggestions
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          query
+        )}&addressdetails=1&limit=10&countrycodes=in`,
+        {
+          headers: {
+            "User-Agent": "UrbanCabz/1.0",
+          },
+        }
+      );
+
+      if (!response.ok) return [];
+
+      const data = await response.json();
+
+      const suggestions = data.map((item) => {
+        const addr = item.address || {};
+
+        // Accurate components
+        const building = addr.building || addr.house_name || addr.apartment || addr.residential || "";
+        const houseNum = addr.house_number ? `#${addr.house_number}` : "";
+        const road = addr.road || "";
+        const area = addr.neighbourhood || addr.suburb || addr.subdistrict || addr['sub-district'] || "";
+        const city = addr.city || addr.town || addr.village || addr.district || "";
+        const state = addr.state || "";
+
+        // Combine building and house number if both exist
+        const specificLoc = [building, houseNum].filter(Boolean).join(", ");
+
+        const components = [
+          item.name !== city ? item.name : "", // Place name (if not just the city name)
+          specificLoc,
+          road,
+          area,
+          city,
+          state
+        ].filter((val, index, self) =>
+          val &&
+          val.length > 1 &&
+          self.indexOf(val) === index
+        );
+
+        let label = components.join(", ");
+
+        // If label is too short, use a portion of the display_name
+        if (components.length < 3) {
+          label = item.display_name.split(", ").slice(0, 4).join(", ");
+        }
+
+        // Final cleanup for "India"
+        if (!label.toLowerCase().includes("india")) {
+          label += ", India";
+        }
+
+        return label;
+      });
+
+      // Cache results
+      geocodeMemoryCache.set(cacheKey, suggestions);
+
+      return suggestions;
+    } catch (error) {
+      console.warn("Suggestion fetch error:", error);
+      return [];
+    }
+  },
+
   async geocodeLocation(address) {
     const normalized = normalizeAddress(address);
     if (!normalized) throw new Error('Address is required');
@@ -235,9 +314,9 @@ const RoutingService = {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(this.toRad(lat1)) *
-        Math.cos(this.toRad(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
+      Math.cos(this.toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   },

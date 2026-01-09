@@ -30,7 +30,7 @@ const MapplsService = {
       const data = await response.json();
       this.accessToken = data.access_token;
       this.tokenExpiry = Date.now() + (data.expires_in * 1000) - 60000;
-      
+
       return this.accessToken;
     } catch (error) {
       console.error('Mappls auth error:', error);
@@ -42,7 +42,7 @@ const MapplsService = {
   async geocodeLocation(address) {
     try {
       const token = await this.getAccessToken();
-      
+
       const response = await fetch(
         `https://atlas.mappls.com/api/places/geocode?address=${encodeURIComponent(address)}`,
         {
@@ -53,7 +53,7 @@ const MapplsService = {
       if (!response.ok) throw new Error('Geocoding failed');
 
       const data = await response.json();
-      
+
       if (data.copResults && data.copResults.length > 0) {
         const result = data.copResults[0];
         return {
@@ -62,7 +62,7 @@ const MapplsService = {
           formattedAddress: result.formattedAddress || address,
         };
       }
-      
+
       throw new Error('No results found');
     } catch (error) {
       console.error('Geocoding error:', error);
@@ -101,8 +101,8 @@ const MapplsService = {
           distanceKm: parseFloat(distanceKm),
           durationMins,
           distanceText: `${distanceKm} km`,
-          durationText: durationHours > 0 
-            ? `${durationHours} hr ${remainingMins} min` 
+          durationText: durationHours > 0
+            ? `${durationHours} hr ${remainingMins} min`
             : `${durationMins} min`,
           fromCoords,
           toCoords,

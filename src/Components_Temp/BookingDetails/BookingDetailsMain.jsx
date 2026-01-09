@@ -14,6 +14,9 @@ export default function BookingDetailsMain({
   distanceKm,
   rideType = "oneway",
   price,
+  formData,
+  formErrors = {},
+  onFormChange,
   onBack = () => { },
 }) {
   const { user } = useAuth();
@@ -152,6 +155,11 @@ export default function BookingDetailsMain({
                   Includes return journey
                 </div>
               )}
+              {distanceKm === 300 || (rideType === "roundtrip" && distanceKm % 300 === 0 && distanceKm >= 300) ? (
+                <div className="mt-2 text-[10px] text-amber-700 font-bold bg-amber-50 px-2 py-1 rounded border border-amber-100 uppercase tracking-tighter text-center">
+                  * Minimum 300km/day charge applies
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
@@ -175,7 +183,6 @@ export default function BookingDetailsMain({
                 </span>
               </li>
               <li>Driver & vehicle charges</li>
-              <li>Standard waiting at pickup (up to 15 mins)</li>
             </ul>
           </div>
 
@@ -191,8 +198,7 @@ export default function BookingDetailsMain({
               <li>Toll charges</li>
               <li>State tax</li>
               <li>Parking charges</li>
-              <li>Waiting charges after 45 mins (₹100 / 30 mins)</li>
-              <li>Fare beyond {distanceKm} kms (₹19 / km)</li>
+              <li>Fare beyond {distanceKm} kms (₹{listing.basePrice || 13} / km)</li>
             </ul>
           </div>
         </div>
@@ -246,9 +252,13 @@ export default function BookingDetailsMain({
               </label>
               <input
                 placeholder="Your name"
-                defaultValue={user?.name || ""}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
+                value={formData?.name || ""}
+                onChange={(e) => onFormChange("name", e.target.value)}
+                className={`w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 ${formErrors.name ? "border-red-500" : "border-slate-200"}`}
               />
+              {formErrors.name && (
+                <p className="mt-1 text-xs text-red-500">{formErrors.name}</p>
+              )}
             </div>
 
             <div>
@@ -257,9 +267,13 @@ export default function BookingDetailsMain({
               </label>
               <input
                 placeholder="+91 9XXXXXXXXX"
-                defaultValue={user?.phone || ""}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
+                value={formData?.phone || ""}
+                onChange={(e) => onFormChange("phone", e.target.value)}
+                className={`w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 ${formErrors.phone ? "border-red-500" : "border-slate-200"}`}
               />
+              {formErrors.phone && (
+                <p className="mt-1 text-xs text-red-500">{formErrors.phone}</p>
+              )}
             </div>
           </div>
 
@@ -270,9 +284,13 @@ export default function BookingDetailsMain({
               </label>
               <input
                 placeholder="you@example.com"
-                defaultValue={user?.email || ""}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
+                value={formData?.email || ""}
+                onChange={(e) => onFormChange("email", e.target.value)}
+                className={`w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 ${formErrors.email ? "border-red-500" : "border-slate-200"}`}
               />
+              {formErrors.email && (
+                <p className="mt-1 text-xs text-red-500">{formErrors.email}</p>
+              )}
             </div>
 
             <div>
@@ -281,6 +299,8 @@ export default function BookingDetailsMain({
               </label>
               <input
                 placeholder="Eg. travelling with kids, extra luggage…"
+                value={formData?.remarks || ""}
+                onChange={(e) => onFormChange("remarks", e.target.value)}
                 className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
               />
             </div>

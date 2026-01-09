@@ -9,6 +9,7 @@ export default function CabBooking() {
   const from = state?.from || "Pickup location";
   const to = state?.to || "Drop location";
   const pickupDate = state?.pickupDate || "—";
+  const returnDate = state?.returnDate || "—";
   const pickupTime = state?.pickupTime || "—";
   const rideType = state?.rideType || "airport";
 
@@ -140,6 +141,7 @@ export default function CabBooking() {
                 distanceKm={distanceKm}
                 rideType={rideType}
                 pickupDate={pickupDate}
+                returnDate={returnDate}
                 pickupTime={pickupTime}
               />
             ))}

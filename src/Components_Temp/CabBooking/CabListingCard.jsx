@@ -9,6 +9,7 @@ export default function CabListingCard({
   distanceKm,
   rideType = "oneway",
   pickupDate,
+  returnDate,
   pickupTime,
 }) {
   const {
@@ -25,16 +26,29 @@ export default function CabListingCard({
   const calculatePrice = () => {
     if (!distanceKm) return 0;
 
-    const tripMultiplier = rideType === "roundtrip" ? 2 : 1;
-    const billableDistance = distanceKm * tripMultiplier;
+    let billableDistance = 0;
+    const MIN_KM_PER_DAY = 300;
 
-    let pricePerKm = basePrice;
+    if (rideType === "oneway" || rideType === "airport") {
+      // One-way: Base 300km
+      billableDistance = Math.max(MIN_KM_PER_DAY, distanceKm);
+    } else if (rideType === "roundtrip") {
+      // Round-trip: 300km * number of days
+      let days = 1;
+      if (pickupDate && returnDate && pickupDate !== "—" && returnDate !== "—") {
+        const start = new Date(pickupDate);
+        const end = new Date(returnDate);
+        const diffTime = Math.abs(end - start);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        days = diffDays + 1; // Include both start and end day
+      }
 
-    // Fixed: Removed partial 10% discount for >300km to match user expectation of linear pricing.
-    // if (billableDistance > 300) {
-    //   pricePerKm = basePrice * 0.9;
-    // }
+      const baseKm = days * MIN_KM_PER_DAY;
+      const actualKm = distanceKm * 2; // Assuming distanceKm is one-way distance
+      billableDistance = Math.max(baseKm, actualKm);
+    }
 
+    const pricePerKm = basePrice;
     const totalPrice = Math.round(billableDistance * pricePerKm);
     return totalPrice;
   };
@@ -66,6 +80,7 @@ export default function CabListingCard({
         distanceKm,
         rideType,
         pickupDate,
+        returnDate,
         pickupTime,
       },
     });
@@ -187,6 +202,12 @@ export default function CabListingCard({
                       Roundtrip
                     </span>
                   )}
+                  {((rideType === "oneway" || rideType === "airport") && distanceKm < 300) ||
+                    (rideType === "roundtrip" && (distanceKm * 2) < (300 * (pickupDate && returnDate && pickupDate !== "—" && returnDate !== "—" ? Math.ceil(Math.abs(new Date(returnDate) - new Date(pickupDate)) / (1000 * 60 * 60 * 24)) + 1 : 1))) ? (
+                    <span className="text-[9px] text-amber-600 font-medium italic mt-1 text-right">
+                      *Min 300km/day charge applies
+                    </span>
+                  ) : null}
                 </div>
               )}
             </div>
